@@ -18,7 +18,9 @@ export async function sendCandidateInvite(
   const body = language === 'es' ? bodyEs(candidateName, jobTitle, companyName, applyUrl) : bodyEn(candidateName, jobTitle, companyName, applyUrl)
 
   const resend = new Resend(process.env.RESEND_API_KEY)
-  const from = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
+  // Default sender uses the Zephyron Consulting verified domain (same one used by 360 Evaluate).
+  // `hire@` distinguishes hiring-process emails from 360-feedback ones (which send from `360@`).
+  const from = process.env.RESEND_FROM_EMAIL || 'Zephyron Consulting <hire@zephyronconsulting.com>'
 
   await resend.emails.send({
     from,
