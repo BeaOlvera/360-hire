@@ -5,6 +5,7 @@ import Link from 'next/link'
 import AdminHeader from '../../AdminHeader'
 import { logAudit } from '@/lib/audit'
 import ScoringPanel from './ScoringPanel'
+import CandidateLinkCard from './CandidateLinkCard'
 import { ASSESSMENT_CODES, getAssessment, type AssessmentCode } from '@/lib/assessments'
 
 type Message = { role: 'assistant' | 'user'; content: string; created_at: string }
@@ -13,7 +14,7 @@ async function getApplication(id: string) {
   const { data: app, error } = await supabaseAdmin
     .from('applications')
     .select(`
-      id, job_id, status, cv_url, cv_text, video_url, fit_score, recommendation, report_html,
+      id, job_id, status, cv_url, cv_text, video_url, fit_score, recommendation, report_html, token,
       reviewed_by, reviewed_at, review_notes, invited_at, started_at, completed_at,
       jobs ( id, title, description, language, org_level, hiring_manager, assessments ),
       candidates ( first_name, surname1, surname2, email, preferred_language )
@@ -106,6 +107,11 @@ export default async function ApplicationReviewPage({ params }: { params: { id: 
           <Stat label="Invited" value={formatDateTime(app.invited_at)} />
           <Stat label="Interview length" value={formatDuration(app.started_at, app.completed_at)} />
         </div>
+
+        {/* Candidate link, shareable directly if email doesn't deliver */}
+        {app.status !== 'completed' && app.status !== 'reviewed' && app.status !== 'hired' && app.status !== 'rejected' && (
+          <CandidateLinkCard token={app.token} />
+        )}
 
         <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 22, alignItems: 'start' }}>
 
