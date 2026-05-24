@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "app/api/admin/applications/[id]/score/route.ts":         { "maxDuration": 60 },
+    "app/api/admin/applications/[id]/comprehensive/route.ts": { "maxDuration": 60 },
+    "app/api/admin/applications/[id]/report.pdf/route.ts":    { "maxDuration": 60 },
+    "app/api/admin/jobs/extract-from-file/route.ts":          { "maxDuration": 30 },
+    "app/api/apply/[token]/chat/route.ts":                    { "maxDuration": 30 },
+    "app/api/apply/[token]/cv/route.ts":                      { "maxDuration": 30 },
+    "app/api/apply/[token]/transcribe/route.ts":              { "maxDuration": 30 },
+    "app/api/apply/[token]/video/route.ts":                   { "maxDuration": 60 }
+  }
+}
