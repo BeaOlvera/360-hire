@@ -23,6 +23,7 @@ export default function AdminHeader() {
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           <Link href="/admin/dashboard" style={pillStyle}>Jobs</Link>
           <Link href="/admin/candidates" style={pillStyle}>Candidates</Link>
+          <Link href="/admin/samples" style={pillStyle}>Samples</Link>
           <button onClick={handleLogout} style={{ ...pillStyle, border: '1px solid #E2E0DA', cursor: 'pointer', fontFamily: 'inherit' }}>
             Sign out
           </button>
