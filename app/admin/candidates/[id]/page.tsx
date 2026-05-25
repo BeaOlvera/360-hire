@@ -23,7 +23,7 @@ async function getCandidate(id: string) {
 
   const { data: openJobs } = await supabaseAdmin
     .from('jobs')
-    .select('id, title')
+    .select('id, title, assessments, competencies')
     .eq('status', 'open')
     .order('created_at', { ascending: false })
 
@@ -58,7 +58,15 @@ export default async function CandidateDetail({ params }: { params: { id: string
           <p style={{ fontSize: 13, color: '#6B6B6B', marginTop: 4 }}>{candidate.email} · {(candidate.preferred_language ?? 'en').toUpperCase()}</p>
         </div>
 
-        <CandidateActions candidateId={candidate.id} openJobs={openJobs} />
+        <CandidateActions
+          candidateId={candidate.id}
+          openJobs={openJobs.map((j: any) => ({
+            id: j.id,
+            title: j.title,
+            assessments: Array.isArray(j.assessments) ? j.assessments : [],
+            competencies: Array.isArray(j.competencies) ? j.competencies : [],
+          }))}
+        />
 
         <div style={{ marginTop: 26 }}>
           <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.15em', color: '#AEABA3', textTransform: 'uppercase', marginBottom: 12 }}>Evaluations</p>

@@ -11,7 +11,7 @@ import { getAssessment, ASSESSMENT_CODES } from '@/lib/assessments'
 export async function POST(request: NextRequest, { params }: { params: { token: string } }) {
   const { data: app, error } = await supabaseAdmin
     .from('applications')
-    .select(`id, status, job_id,
+    .select(`id, status, job_id, assessments_override,
       jobs ( assessments, language ),
       candidates ( preferred_language )
     `)
@@ -37,9 +37,11 @@ export async function POST(request: NextRequest, { params }: { params: { token: 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const candidate = app.candidates as any
   const isGeneric = !job
-  const enabled: string[] = isGeneric
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const override = Array.isArray((app as any).assessments_override) ? (app as any).assessments_override : null
+  const enabled: string[] = override ?? (isGeneric
     ? ['thinking_style', 'growth_orientation', 'career_values', 'big_five', 'resilience']
-    : (Array.isArray(job?.assessments) ? job.assessments : [])
+    : (Array.isArray(job?.assessments) ? job.assessments : []))
   if (!enabled.includes(code)) {
     return NextResponse.json({ error: 'This assessment is not enabled for this evaluation' }, { status: 400 })
   }

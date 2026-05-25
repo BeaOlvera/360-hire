@@ -8,29 +8,29 @@ export async function sendCandidateInvite(
   token: string,
   appUrl: string,
   language: 'en' | 'es' = 'en',
+  isGeneric: boolean = false,
 ): Promise<void> {
   const applyUrl = `${appUrl}/apply/${token}`
 
-  const subject = language === 'es'
-    ? `Tu entrevista para el puesto de ${jobTitle}`
-    : `Your interview for the ${jobTitle} role`
+  const subject = isGeneric
+    ? (language === 'es'
+        ? `Invitación a una evaluación profesional`
+        : `Invitation to a professional assessment`)
+    : (language === 'es'
+        ? `Tu entrevista para el puesto de ${jobTitle}`
+        : `Your interview for the ${jobTitle} role`)
 
-  const body = language === 'es' ? bodyEs(candidateName, jobTitle, companyName, applyUrl) : bodyEn(candidateName, jobTitle, companyName, applyUrl)
+  const body = isGeneric
+    ? (language === 'es' ? bodyGenericEs(candidateName, applyUrl) : bodyGenericEn(candidateName, applyUrl))
+    : (language === 'es' ? bodyJobEs(candidateName, jobTitle, companyName, applyUrl) : bodyJobEn(candidateName, jobTitle, companyName, applyUrl))
 
   const resend = new Resend(process.env.RESEND_API_KEY)
-  // Default sender uses the Zephyron Consulting verified domain (same one used by 360 Evaluate).
-  // `hire@` distinguishes hiring-process emails from 360-feedback ones (which send from `360@`).
   const from = process.env.RESEND_FROM_EMAIL || 'Zephyron Consulting <hire@zephyronconsulting.com>'
 
-  await resend.emails.send({
-    from,
-    to,
-    subject,
-    html: body,
-  })
+  await resend.emails.send({ from, to, subject, html: body })
 }
 
-function bodyEn(name: string, jobTitle: string, company: string | null, url: string) {
+function bodyJobEn(name: string, jobTitle: string, company: string | null, url: string) {
   const company_line = company ? ` at ${company}` : ''
   return `
   <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; color: #0A0A0A;">
@@ -46,7 +46,7 @@ function bodyEn(name: string, jobTitle: string, company: string | null, url: str
   </div>`
 }
 
-function bodyEs(name: string, jobTitle: string, company: string | null, url: string) {
+function bodyJobEs(name: string, jobTitle: string, company: string | null, url: string) {
   const company_line = company ? ` en ${company}` : ''
   return `
   <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; color: #0A0A0A;">
@@ -56,6 +56,36 @@ function bodyEs(name: string, jobTitle: string, company: string | null, url: str
     <p>Antes de comenzar, te pediremos que subas tu CV y revises el aviso de privacidad.</p>
     <p style="margin: 28px 0;">
       <a href="${url}" style="background: #0F3D3E; color: #FFFFFF; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: 600;">Iniciar entrevista</a>
+    </p>
+    <p style="font-size: 12px; color: #6B6B6B;">Si el botón no funciona, copia este enlace en tu navegador: <br/><a href="${url}">${url}</a></p>
+    <p style="font-size: 11px; color: #AEABA3; margin-top: 32px;">Este enlace es único para ti. Por favor no lo compartas.</p>
+  </div>`
+}
+
+function bodyGenericEn(name: string, url: string) {
+  return `
+  <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; color: #0A0A0A;">
+    <p>Hello ${name},</p>
+    <p>You have been invited to complete a <strong>professional assessment</strong>. This is not tied to a specific role; rather, it is a structured way for us to learn about your strengths, working style and motivations so we can match you to projects and opportunities where you would do your best work.</p>
+    <p>The assessment includes a short set of questionnaires followed by a conversational interview with our AI interviewer, about 30 to 45 minutes in total. You can speak or type your answers, the choice is yours.</p>
+    <p>Before you begin, you'll be asked to upload your CV and review the privacy notice.</p>
+    <p style="margin: 28px 0;">
+      <a href="${url}" style="background: #0F3D3E; color: #FFFFFF; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: 600;">Start the assessment</a>
+    </p>
+    <p style="font-size: 12px; color: #6B6B6B;">If the button does not work, copy this link into your browser: <br/><a href="${url}">${url}</a></p>
+    <p style="font-size: 11px; color: #AEABA3; margin-top: 32px;">This link is unique to you. Please do not share it.</p>
+  </div>`
+}
+
+function bodyGenericEs(name: string, url: string) {
+  return `
+  <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; color: #0A0A0A;">
+    <p>Hola ${name},</p>
+    <p>Te invitamos a completar una <strong>evaluación profesional</strong>. No está vinculada a un puesto concreto; es una forma estructurada de conocer tus fortalezas, tu estilo de trabajo y tus motivaciones, para poder proponerte proyectos y oportunidades donde puedas dar lo mejor de ti.</p>
+    <p>La evaluación incluye una serie breve de cuestionarios seguida de una entrevista conversacional con nuestra entrevistadora de IA, en total unos 30 a 45 minutos. Puedes responder hablando o escribiendo, tú eliges.</p>
+    <p>Antes de comenzar, te pediremos que subas tu CV y revises el aviso de privacidad.</p>
+    <p style="margin: 28px 0;">
+      <a href="${url}" style="background: #0F3D3E; color: #FFFFFF; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: 600;">Empezar la evaluación</a>
     </p>
     <p style="font-size: 12px; color: #6B6B6B;">Si el botón no funciona, copia este enlace en tu navegador: <br/><a href="${url}">${url}</a></p>
     <p style="font-size: 11px; color: #AEABA3; margin-top: 32px;">Este enlace es único para ti. Por favor no lo compartas.</p>

@@ -3,7 +3,26 @@
 import { useState, FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 
-export default function InviteCandidate({ jobId, jobLanguage }: { jobId: string; jobLanguage: string }) {
+type JobCompetency = { name: string; weight?: 1 | 2 | 3 }
+
+type Props = {
+  jobId: string
+  jobLanguage: string
+  jobAssessments: string[]
+  jobCompetencies: JobCompetency[]
+}
+
+const ASSESSMENT_LABELS: Record<string, string> = {
+  thinking_style:     'Thinking Style',
+  growth_orientation: 'Growth Orientation',
+  career_values:      'Career Values',
+  culture_fit:        'Culture Fit (OCAI)',
+  big_five:           'Big Five Personality',
+  icar_reasoning:     'Reasoning (ICAR-style)',
+  resilience:         'Resilience',
+}
+
+export default function InviteCandidate({ jobId, jobLanguage, jobAssessments, jobCompetencies }: Props) {
   const router = useRouter()
   const [firstName, setFirstName] = useState('')
   const [surname1, setSurname1] = useState('')
@@ -13,6 +32,18 @@ export default function InviteCandidate({ jobId, jobLanguage }: { jobId: string;
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
+  // Customisation: start with everything ticked (= use job's defaults)
+  const [customise, setCustomise] = useState(false)
+  const [chosenAssessments, setChosenAssessments] = useState<string[]>(jobAssessments)
+  const [chosenCompetencies, setChosenCompetencies] = useState<string[]>(jobCompetencies.map((c) => c.name))
+
+  function toggleAssessment(code: string) {
+    setChosenAssessments((prev) => prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code])
+  }
+  function toggleCompetency(name: string) {
+    setChosenCompetencies((prev) => prev.includes(name) ? prev.filter((c) => c !== name) : [...prev, name])
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setError(''); setSuccess('')
@@ -20,15 +51,25 @@ export default function InviteCandidate({ jobId, jobLanguage }: { jobId: string;
     if (!email.trim()) { setError('Email is required.'); return }
     setLoading(true)
     try {
+      const body: Record<string, unknown> = {
+        first_name: firstName.trim(),
+        surname1: surname1.trim() || null,
+        email: email.trim(),
+        preferred_language: language,
+      }
+      if (customise) {
+        // Only send overrides if the choice actually differs from the defaults; otherwise omit
+        if (sameSet(chosenAssessments, jobAssessments) === false) {
+          body.assessments_override = chosenAssessments
+        }
+        const chosenCompObjs = jobCompetencies.filter((c) => chosenCompetencies.includes(c.name))
+        if (chosenCompObjs.length !== jobCompetencies.length) {
+          body.competencies_override = chosenCompObjs
+        }
+      }
       const res = await fetch(`/api/admin/jobs/${jobId}/applications`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          first_name: firstName.trim(),
-          surname1: surname1.trim() || null,
-          email: email.trim(),
-          preferred_language: language,
-        }),
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error ?? 'Failed to invite candidate'); return }
@@ -41,6 +82,9 @@ export default function InviteCandidate({ jobId, jobLanguage }: { jobId: string;
       setLoading(false)
     }
   }
+
+  const hasAssessments = jobAssessments.length > 0
+  const hasCompetencies = jobCompetencies.length > 0
 
   return (
     <div style={{ background: '#FFFFFF', border: '1px solid #E2E0DA', borderRadius: 20, padding: '24px 28px' }}>
@@ -70,20 +114,67 @@ export default function InviteCandidate({ jobId, jobLanguage }: { jobId: string;
           </div>
         </div>
 
+        {(hasAssessments || hasCompetencies) && (
+          <>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, cursor: 'pointer' }}>
+              <input type="checkbox" checked={customise} onChange={(e) => setCustomise(e.target.checked)} />
+              <span style={{ fontSize: 12, color: '#3F3F3F' }}>
+                Customise for this candidate (otherwise the job&apos;s full configuration is used)
+              </span>
+            </label>
+
+            {customise && (
+              <div style={{ background: '#F5F4F0', border: '1px solid #E2E0DA', borderRadius: 12, padding: '14px 16px', marginBottom: 14, display: 'grid', gridTemplateColumns: hasAssessments && hasCompetencies ? '1fr 1fr' : '1fr', gap: 14 }}>
+                {hasAssessments && (
+                  <div>
+                    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', color: '#6B6B6B', textTransform: 'uppercase', marginBottom: 8 }}>Questionnaires for this candidate</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      {jobAssessments.map((code) => (
+                        <label key={code} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                          <input type="checkbox" checked={chosenAssessments.includes(code)} onChange={() => toggleAssessment(code)} />
+                          <span style={{ fontSize: 12, color: '#0A0A0A' }}>{ASSESSMENT_LABELS[code] ?? code}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {hasCompetencies && (
+                  <div>
+                    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', color: '#6B6B6B', textTransform: 'uppercase', marginBottom: 8 }}>Competencies to explore</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      {jobCompetencies.map((c) => {
+                        const w = c.weight ?? 2
+                        const tag = w === 3 ? 'Critical' : w === 1 ? 'Relevant' : 'Important'
+                        return (
+                          <label key={c.name} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                            <input type="checkbox" checked={chosenCompetencies.includes(c.name)} onChange={() => toggleCompetency(c.name)} />
+                            <span style={{ fontSize: 12, color: '#0A0A0A' }}>{c.name}</span>
+                            <span style={{ fontSize: 9, fontWeight: 800, padding: '1px 6px', borderRadius: 8, background: w === 3 ? '#E2E0DA' : w === 1 ? '#F5F4F0' : '#EAEAEA', color: w === 3 ? '#0A0A0A' : w === 1 ? '#AEABA3' : '#6B6B6B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{tag}</span>
+                          </label>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </>
+        )}
+
         {error && (
           <div style={{ background: '#FBEAEC', border: '1px solid #F5C5CB', borderRadius: 10, padding: '10px 14px', marginBottom: 12 }}>
             <p style={{ fontSize: 12, color: '#9B2335' }}>{error}</p>
           </div>
         )}
         {success && (
-          <div style={{ background: '#EAF4EF', border: '1px solid #B3D9C4', borderRadius: 10, padding: '10px 14px', marginBottom: 12 }}>
-            <p style={{ fontSize: 12, color: '#2D6A4F', fontWeight: 600 }}>{success}</p>
+          <div style={{ background: '#EAEAEA', border: '1px solid #D5D3CE', borderRadius: 10, padding: '10px 14px', marginBottom: 12 }}>
+            <p style={{ fontSize: 12, color: '#3F3F3F', fontWeight: 600 }}>{success}</p>
           </div>
         )}
 
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
           <button type="submit" disabled={loading} style={{
-            background: loading ? '#AEABA3' : '#0F3D3E', color: '#FFFFFF', border: 'none',
+            background: loading ? '#AEABA3' : '#0A0A0A', color: '#FFFFFF', border: 'none',
             borderRadius: 10, padding: '9px 20px', fontSize: 13, fontWeight: 600,
             cursor: loading ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
           }}>
@@ -93,6 +184,13 @@ export default function InviteCandidate({ jobId, jobLanguage }: { jobId: string;
       </form>
     </div>
   )
+}
+
+function sameSet(a: string[], b: string[]): boolean {
+  if (a.length !== b.length) return false
+  const setA = new Set(a)
+  for (const x of b) if (!setA.has(x)) return false
+  return true
 }
 
 const inputStyle: React.CSSProperties = {

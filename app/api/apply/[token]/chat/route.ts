@@ -10,7 +10,7 @@ export async function POST(request: NextRequest, { params }: { params: { token: 
   const { data: app, error } = await supabaseAdmin
     .from('applications')
     .select(`
-      id, status, cv_text,
+      id, status, cv_text, competencies_override,
       jobs ( title, description, org_level, language, competencies ),
       candidates ( first_name, preferred_language )
     `)
@@ -65,7 +65,9 @@ export async function POST(request: NextRequest, { params }: { params: { token: 
   }
 
   const isGeneric = !job
-  const competencies = Array.isArray(job?.competencies) ? job.competencies : []
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const competenciesOverride = Array.isArray((app as any).competencies_override) ? (app as any).competencies_override : null
+  const competencies = competenciesOverride ?? (Array.isArray(job?.competencies) ? job.competencies : [])
   const systemPrompt = isGeneric
     ? buildGenericPrompt({ candidateFirstName, cvText: app.cv_text ?? null, language })
     : buildCandidatePrompt({

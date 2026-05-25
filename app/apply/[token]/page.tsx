@@ -18,7 +18,7 @@ async function getContext(token: string) {
   const { data: app, error } = await supabaseAdmin
     .from('applications')
     .select(`
-      id, status, cv_url, completed_at,
+      id, status, cv_url, completed_at, assessments_override, competencies_override,
       jobs ( title, language, assessments ),
       candidates ( first_name, surname1, surname2, preferred_language )
     `)
@@ -53,10 +53,14 @@ async function getContext(token: string) {
 
   const completedCodes: string[] = (doneAssessments ?? []).map((d) => d.assessment_code)
   const isGeneric = !job
-  // Generic evals (no job) get all 3 standard assessments by default
-  const enabledCodes: string[] = isGeneric
-    ? (['thinking_style', 'growth_orientation', 'career_values'] as string[])
-    : (Array.isArray(job?.assessments) ? job.assessments.filter((c: string) => ASSESSMENT_CODES.includes(c as AssessmentCode)) : [])
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const overrideAssessments: string[] | null = Array.isArray((app as any).assessments_override) ? (app as any).assessments_override : null
+  // Priority: per-application override -> job's enabled list -> generic default (when no job)
+  const enabledCodes: string[] = overrideAssessments
+    ? overrideAssessments.filter((c: string) => ASSESSMENT_CODES.includes(c as AssessmentCode))
+    : isGeneric
+      ? (['thinking_style', 'growth_orientation', 'career_values'] as string[])
+      : (Array.isArray(job?.assessments) ? job.assessments.filter((c: string) => ASSESSMENT_CODES.includes(c as AssessmentCode)) : [])
   const nextAssessment = enabledCodes.find((c) => !completedCodes.includes(c)) ?? null
 
   const candidateFirstName = candidate?.first_name ?? 'Candidate'

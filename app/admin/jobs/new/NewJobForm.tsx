@@ -2,6 +2,7 @@
 
 import { useState, FormEvent, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { COMPETENCY_DICTIONARY } from '@/lib/competency_dictionary'
 
 const ORG_LEVELS = ['Individual contributor', 'Manager', 'Director', 'VP', 'Executive']
 
@@ -15,7 +16,7 @@ const ASSESSMENT_OPTIONS = [
   { code: 'resilience',          name: 'Resilience',              desc: 'Recovery from setbacks and stress, 6 Likert items (~2 min). Inspired by the Brief Resilience Scale framework.' },
 ]
 
-type Competency = { name: string; weight: 1 | 2 | 3 }
+type Competency = { name: string; weight: 1 | 2 | 3; behaviours?: string[] }
 type Culture = { CLAN: number; ADHOCRACY: number; MARKET: number; HIERARCHY: number }
 
 export default function NewJobForm() {
@@ -67,9 +68,9 @@ export default function NewJobForm() {
     setError('')
     if (!title.trim()) { setError('Title is required.'); return }
     if (!description.trim()) { setError('Description is required.'); return }
-    if (assessments.includes('culture_fit')) {
-      const total = culture.CLAN + culture.ADHOCRACY + culture.MARKET + culture.HIERARCHY
-      if (total !== 100) { setError('The culture profile must total 100 points across the four quadrants.'); return }
+    const cultureTotal = culture.CLAN + culture.ADHOCRACY + culture.MARKET + culture.HIERARCHY
+    if (assessments.includes('culture_fit') && cultureTotal !== 100) {
+      setError('The culture profile must total 100 points across the four quadrants when Culture Fit is enabled.'); return
     }
     setLoading(true)
     try {
@@ -83,8 +84,14 @@ export default function NewJobForm() {
           language,
           hiring_manager: hiringManager.trim() || null,
           assessments,
-          culture_profile: assessments.includes('culture_fit') ? culture : null,
-          competencies: comps.filter((c) => c.name.trim().length > 0),
+          culture_profile: cultureTotal === 100 ? culture : null,
+          competencies: comps
+            .filter((c) => c.name.trim().length > 0)
+            .map((c) => ({
+              name: c.name.trim(),
+              weight: c.weight,
+              behaviours: Array.isArray(c.behaviours) ? c.behaviours.filter((b) => b && b.trim().length > 0) : [],
+            })),
         }),
       })
       const data = await res.json()
@@ -173,9 +180,7 @@ export default function NewJobForm() {
         </div>
       </Field>
 
-      {assessments.includes('culture_fit') && (
-        <CultureProfileEditor culture={culture} onChange={setCulture} />
-      )}
+      <CultureProfileEditor culture={culture} onChange={setCulture} cultureFitEnabled={assessments.includes('culture_fit')} />
 
       {error && (
         <div style={{ background: '#FBEAEC', border: '1px solid #F5C5CB', borderRadius: 10, padding: '10px 14px', marginBottom: 14 }}>
@@ -223,21 +228,38 @@ const WEIGHT_FG: Record<1 | 2 | 3, string> = { 1: '#AEABA3', 2: '#6B6B6B', 3: '#
 function CompetenciesEditor({
   comps, onChange,
 }: { comps: Competency[]; onChange: (c: Competency[]) => void }) {
+  const [pickerOpen, setPickerOpen] = useState(false)
+
   function update(i: number, patch: Partial<Competency>) {
     const next = comps.slice()
     next[i] = { ...next[i], ...patch }
     onChange(next)
   }
   function remove(i: number) { onChange(comps.slice(0, i).concat(comps.slice(i + 1))) }
-  function add() { onChange([...comps, { name: '', weight: 2 }]) }
+  function addBlank() { onChange([...comps, { name: '', weight: 2 }]) }
+  function addFromDictionary(id: string) {
+    const def = COMPETENCY_DICTIONARY.find((d) => d.id === id)
+    if (!def) return
+    if (comps.some((c) => c.name.trim().toLowerCase() === def.name.toLowerCase())) return
+    onChange([...comps, { name: def.name, weight: 2, behaviours: def.behaviours }])
+  }
+
+  const usedNames = new Set(comps.map((c) => c.name.trim().toLowerCase()))
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       {comps.map((c, i) => (
         <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 130px 36px', gap: 8, alignItems: 'center' }}>
-          <input value={c.name} onChange={(e) => update(i, { name: e.target.value })}
-            placeholder="e.g. Stakeholder management"
-            style={{ width: '100%', padding: '8px 10px', border: '1px solid #E2E0DA', borderRadius: 8, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const, outline: 'none' }} />
+          <div>
+            <input value={c.name} onChange={(e) => update(i, { name: e.target.value })}
+              placeholder="e.g. Stakeholder management"
+              style={{ width: '100%', padding: '8px 10px', border: '1px solid #E2E0DA', borderRadius: 8, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' as const, outline: 'none' }} />
+            {Array.isArray(c.behaviours) && c.behaviours.length > 0 && (
+              <p style={{ fontSize: 10, color: '#AEABA3', marginTop: 3, fontStyle: 'italic' }}>
+                {c.behaviours.length} behaviour{c.behaviours.length === 1 ? '' : 's'} from library
+              </p>
+            )}
+          </div>
           <select value={c.weight} onChange={(e) => update(i, { weight: Number(e.target.value) as 1 | 2 | 3 })}
             style={{ width: '100%', padding: '8px 10px', border: '1px solid #E2E0DA', borderRadius: 8, fontSize: 12, fontFamily: 'inherit', fontWeight: 700, color: WEIGHT_FG[c.weight], background: WEIGHT_BG[c.weight], appearance: 'none' as const, outline: 'none' }}>
             <option value={3}>Critical</option>
@@ -249,10 +271,35 @@ function CompetenciesEditor({
             style={{ background: '#FFFFFF', color: '#9B2335', border: '1px solid #E2E0DA', borderRadius: 8, padding: '7px 0', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>×</button>
         </div>
       ))}
-      <button type="button" onClick={add}
-        style={{ alignSelf: 'flex-start', background: '#FFFFFF', color: '#0A0A0A', border: '1px dashed #E2E0DA', borderRadius: 10, padding: '8px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
-        + Add competency
-      </button>
+
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' as const }}>
+        <button type="button" onClick={addBlank}
+          style={{ background: '#FFFFFF', color: '#0A0A0A', border: '1px dashed #E2E0DA', borderRadius: 10, padding: '8px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+          + Add custom competency
+        </button>
+        <button type="button" onClick={() => setPickerOpen((v) => !v)}
+          style={{ background: pickerOpen ? '#0A0A0A' : '#FFFFFF', color: pickerOpen ? '#FFFFFF' : '#0A0A0A', border: '1px solid #0A0A0A', borderRadius: 10, padding: '8px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+          {pickerOpen ? 'Close library' : '+ Pick from library'}
+        </button>
+      </div>
+
+      {pickerOpen && (
+        <div style={{ background: '#F5F4F0', border: '1px solid #E2E0DA', borderRadius: 12, padding: '14px 16px', marginTop: 4 }}>
+          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', color: '#6B6B6B', textTransform: 'uppercase', marginBottom: 8 }}>Competency library</p>
+          <p style={{ fontSize: 11, color: '#AEABA3', marginBottom: 10 }}>Each adds its name and the underlying behaviours the AI interviewer will probe. You can still adjust the weight after.</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
+            {COMPETENCY_DICTIONARY.map((d) => {
+              const used = usedNames.has(d.name.toLowerCase())
+              return (
+                <button key={d.id} type="button" disabled={used} onClick={() => addFromDictionary(d.id)}
+                  style={{ textAlign: 'left' as const, background: used ? '#EAEAEA' : '#FFFFFF', color: used ? '#AEABA3' : '#0A0A0A', border: '1px solid #E2E0DA', borderRadius: 10, padding: '8px 12px', fontSize: 12, fontWeight: 600, cursor: used ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}>
+                  {used ? '✓ ' : '+ '}{d.name}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -266,8 +313,8 @@ const CULTURE_TYPES: Array<{ key: keyof Culture; name: string; tag: string }> = 
 ]
 
 function CultureProfileEditor({
-  culture, onChange,
-}: { culture: Culture; onChange: (c: Culture) => void }) {
+  culture, onChange, cultureFitEnabled,
+}: { culture: Culture; onChange: (c: Culture) => void; cultureFitEnabled: boolean }) {
   const total = CULTURE_TYPES.reduce((s, t) => s + (culture[t.key] ?? 0), 0)
   const isOk = total === 100
   return (
@@ -276,7 +323,10 @@ function CultureProfileEditor({
         <p style={{ fontSize: 12, fontWeight: 700, color: '#0A0A0A' }}>Company culture profile for this role</p>
         <span style={{ fontSize: 12, fontWeight: 700, color: isOk ? '#0A0A0A' : '#9B2335' }}>Total: {total} / 100</span>
       </div>
-      <p style={{ fontSize: 11, color: '#6B6B6B', marginBottom: 12 }}>Distribute 100 points across the four OCAI quadrants describing the culture in which the new hire will work. The candidate&apos;s preference is compared to this profile.</p>
+      <p style={{ fontSize: 11, color: '#6B6B6B', marginBottom: 12 }}>
+        Distribute 100 points across the four OCAI quadrants describing the culture in which the new hire will work. The candidate&apos;s preference is compared to this profile when the <strong>Culture Fit</strong> assessment is enabled
+        {cultureFitEnabled ? '' : ' (currently disabled — enable it above to use this comparison)'}.
+      </p>
       {CULTURE_TYPES.map((t) => {
         const v = culture[t.key] ?? 0
         return (

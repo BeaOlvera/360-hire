@@ -15,7 +15,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   const { data: app, error } = await supabaseAdmin
     .from('applications')
     .select(`
-      id, token, status,
+      id, token, status, job_id,
       jobs ( title ),
       candidates ( first_name, surname1, email, preferred_language )
     `)
@@ -35,10 +35,11 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3003'
   const lang: 'en' | 'es' = candidate.preferred_language === 'es' ? 'es' : 'en'
   const fullName = [candidate.first_name, candidate.surname1].filter(Boolean).join(' ') || 'Candidate'
-  const titleForEmail = job?.title ?? (lang === 'es' ? 'una evaluación general' : 'a general evaluation')
+  const isGeneric = !app.job_id
+  const titleForEmail = job?.title ?? ''
 
   try {
-    await sendCandidateInvite(candidate.email, fullName, titleForEmail, null, app.token, appUrl, lang)
+    await sendCandidateInvite(candidate.email, fullName, titleForEmail, null, app.token, appUrl, lang, isGeneric)
   } catch (err: any) {
     console.error('Resend invite failed:', err)
     return NextResponse.json({ error: err?.message ?? 'Could not send the email' }, { status: 500 })

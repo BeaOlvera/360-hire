@@ -21,7 +21,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   const { data: app, error } = await supabaseAdmin
     .from('applications')
     .select(`
-      id, status, cv_text, score_data, completed_at, recommendation, fit_score,
+      id, status, cv_text, score_data, completed_at, recommendation, fit_score, competencies_override,
       jobs ( title, description, org_level, language, competencies ),
       candidates ( first_name, surname1, surname2, preferred_language )
     `)
@@ -60,9 +60,13 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     }
   })
 
-  const jobCompetencies: Array<{ name: string; weight?: number }> = Array.isArray(job?.competencies)
-    ? job.competencies.map((c: any) => ({ name: String(c.name ?? ''), weight: Number(c.weight ?? 2) }))
-    : []
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const competenciesOverride = Array.isArray((app as any).competencies_override) ? (app as any).competencies_override : null
+  const jobCompetencies: Array<{ name: string; weight?: number }> = competenciesOverride
+    ? competenciesOverride.map((c: any) => ({ name: String(c.name ?? ''), weight: Number(c.weight ?? 2) }))
+    : (Array.isArray(job?.competencies)
+        ? job.competencies.map((c: any) => ({ name: String(c.name ?? ''), weight: Number(c.weight ?? 2) }))
+        : [])
 
   let result
   try {

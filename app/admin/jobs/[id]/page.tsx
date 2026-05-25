@@ -19,7 +19,7 @@ type ApplicationRow = {
 async function getJob(id: string) {
   const { data: job, error } = await supabaseAdmin
     .from('jobs')
-    .select('id, title, description, org_level, language, hiring_manager, status, created_at')
+    .select('id, title, description, org_level, language, hiring_manager, status, created_at, assessments, competencies')
     .eq('id', id)
     .single()
   if (error || !job) return null
@@ -104,7 +104,12 @@ export default async function JobDetailPage({ params }: { params: { id: string }
         </div>
 
         {/* Invite + applications */}
-        <InviteCandidate jobId={job.id} jobLanguage={job.language} />
+        <InviteCandidate
+          jobId={job.id}
+          jobLanguage={job.language}
+          jobAssessments={Array.isArray((job as any).assessments) ? (job as any).assessments : []}
+          jobCompetencies={Array.isArray((job as any).competencies) ? (job as any).competencies : []}
+        />
 
         <div style={{ marginTop: 28 }}>
           <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.15em', color: '#AEABA3', textTransform: 'uppercase', marginBottom: 12 }}>
