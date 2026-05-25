@@ -14,10 +14,10 @@ async function getApplication(id: string) {
   const { data: app, error } = await supabaseAdmin
     .from('applications')
     .select(`
-      id, job_id, status, cv_url, cv_text, video_url, fit_score, recommendation, report_html, token,
+      id, job_id, candidate_id, status, cv_url, cv_text, video_url, fit_score, recommendation, report_html, token,
       reviewed_by, reviewed_at, review_notes, invited_at, started_at, completed_at,
       jobs ( id, title, description, language, org_level, hiring_manager, assessments ),
-      candidates ( first_name, surname1, surname2, email, preferred_language )
+      candidates ( id, first_name, surname1, surname2, email, preferred_language )
     `)
     .eq('id', id)
     .single()
@@ -91,7 +91,21 @@ export default async function ApplicationReviewPage({ params }: { params: { id: 
       <AdminHeader />
 
       <main style={{ maxWidth: 1100, margin: '0 auto', padding: '32px' }}>
-        <Link href={`/admin/jobs/${job?.id ?? ''}`} style={{ fontSize: 12, color: '#6B6B6B', textDecoration: 'none', marginBottom: 12, display: 'inline-block' }}>← Back to job</Link>
+        <div style={{ display: 'flex', gap: 14, marginBottom: 12, fontSize: 12, color: '#6B6B6B' }}>
+          <Link href="/admin/dashboard" style={{ color: '#6B6B6B', textDecoration: 'none' }}>← All jobs</Link>
+          {job?.id && (
+            <>
+              <span style={{ color: '#D5D3CE' }}>·</span>
+              <Link href={`/admin/jobs/${job.id}`} style={{ color: '#6B6B6B', textDecoration: 'none' }}>Job: {job.title}</Link>
+            </>
+          )}
+          {candidate?.id && (
+            <>
+              <span style={{ color: '#D5D3CE' }}>·</span>
+              <Link href={`/admin/candidates/${candidate.id}`} style={{ color: '#6B6B6B', textDecoration: 'none' }}>Candidate profile</Link>
+            </>
+          )}
+        </div>
 
         <div style={{ marginBottom: 22 }}>
           <h1 style={{ fontSize: 24, fontWeight: 700, color: '#0A0A0A', letterSpacing: '-0.4px' }}>{candidateName}</h1>
