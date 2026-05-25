@@ -108,9 +108,9 @@ export default async function ApplicationReviewPage({ params }: { params: { id: 
           <Stat label="Interview length" value={formatDuration(app.started_at, app.completed_at)} />
         </div>
 
-        {/* Candidate link, shareable directly if email doesn't deliver */}
+        {/* Candidate link, shareable directly + resend invite email */}
         {app.status !== 'completed' && app.status !== 'reviewed' && app.status !== 'hired' && app.status !== 'rejected' && (
-          <CandidateLinkCard token={app.token} />
+          <CandidateLinkCard applicationId={app.id} token={app.token} candidateEmail={candidate?.email ?? null} />
         )}
 
         <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 22, alignItems: 'start' }}>
