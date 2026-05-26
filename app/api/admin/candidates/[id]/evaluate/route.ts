@@ -58,15 +58,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     if (j.status !== 'open') return NextResponse.json({ error: 'Job is not open' }, { status: 400 })
     job = j
 
-    // Constrain overrides to subsets of what the job allows
-    if (assessmentsOverride) {
-      const jobAssessments: string[] = Array.isArray(job.assessments) ? job.assessments : []
-      for (const code of assessmentsOverride) {
-        if (!jobAssessments.includes(code)) {
-          return NextResponse.json({ error: `Assessment ${code} is not enabled for this job` }, { status: 400 })
-        }
-      }
-    }
+    // Admin can broaden the questionnaire set per candidate; no subset check.
   }
 
   const insertPayload: Record<string, any> = job

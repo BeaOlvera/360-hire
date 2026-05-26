@@ -12,15 +12,15 @@ type Props = {
   jobCompetencies: JobCompetency[]
 }
 
-const ASSESSMENT_LABELS: Record<string, string> = {
-  thinking_style:     'Thinking Style',
-  growth_orientation: 'Growth Orientation',
-  career_values:      'Career Values',
-  culture_fit:        'Culture Fit (OCAI)',
-  big_five:           'Big Five Personality',
-  icar_reasoning:     'Reasoning (ICAR-style)',
-  resilience:         'Resilience',
-}
+const ALL_ASSESSMENTS: Array<{ code: string; label: string }> = [
+  { code: 'thinking_style',     label: 'Thinking Style' },
+  { code: 'growth_orientation', label: 'Growth Orientation' },
+  { code: 'career_values',      label: 'Career Values' },
+  { code: 'culture_fit',        label: 'Culture Fit (OCAI)' },
+  { code: 'big_five',           label: 'Big Five Personality' },
+  { code: 'icar_reasoning',     label: 'Reasoning (ICAR-style)' },
+  { code: 'resilience',         label: 'Resilience' },
+]
 
 export default function InviteCandidate({ jobId, jobLanguage, jobAssessments, jobCompetencies }: Props) {
   const router = useRouter()
@@ -32,9 +32,11 @@ export default function InviteCandidate({ jobId, jobLanguage, jobAssessments, jo
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
-  // Customisation: start with everything ticked (= use job's defaults)
+  // Customisation: start ticked from the job's defaults; admin can add or remove anything
   const [customise, setCustomise] = useState(false)
-  const [chosenAssessments, setChosenAssessments] = useState<string[]>(jobAssessments)
+  const [chosenAssessments, setChosenAssessments] = useState<string[]>(
+    jobAssessments.length > 0 ? jobAssessments : ALL_ASSESSMENTS.map((a) => a.code)
+  )
   const [chosenCompetencies, setChosenCompetencies] = useState<string[]>(jobCompetencies.map((c) => c.name))
 
   function toggleAssessment(code: string) {
@@ -58,10 +60,8 @@ export default function InviteCandidate({ jobId, jobLanguage, jobAssessments, jo
         preferred_language: language,
       }
       if (customise) {
-        // Only send overrides if the choice actually differs from the defaults; otherwise omit
-        if (sameSet(chosenAssessments, jobAssessments) === false) {
-          body.assessments_override = chosenAssessments
-        }
+        // Always send the explicit selection — admin may have broadened the set beyond job defaults
+        body.assessments_override = chosenAssessments
         const chosenCompObjs = jobCompetencies.filter((c) => chosenCompetencies.includes(c.name))
         if (chosenCompObjs.length !== jobCompetencies.length) {
           body.competencies_override = chosenCompObjs
@@ -83,8 +83,9 @@ export default function InviteCandidate({ jobId, jobLanguage, jobAssessments, jo
     }
   }
 
-  const hasAssessments = jobAssessments.length > 0
   const hasCompetencies = jobCompetencies.length > 0
+  // Always offer the full questionnaire set — admin can pick any per candidate
+  const hasAssessments = true
 
   return (
     <div style={{ background: '#FFFFFF', border: '1px solid #E2E0DA', borderRadius: 20, padding: '24px 28px' }}>
@@ -129,12 +130,16 @@ export default function InviteCandidate({ jobId, jobLanguage, jobAssessments, jo
                   <div>
                     <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', color: '#6B6B6B', textTransform: 'uppercase', marginBottom: 8 }}>Questionnaires for this candidate</p>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                      {jobAssessments.map((code) => (
-                        <label key={code} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                          <input type="checkbox" checked={chosenAssessments.includes(code)} onChange={() => toggleAssessment(code)} />
-                          <span style={{ fontSize: 12, color: '#0A0A0A' }}>{ASSESSMENT_LABELS[code] ?? code}</span>
-                        </label>
-                      ))}
+                      {ALL_ASSESSMENTS.map((a) => {
+                        const fromJob = jobAssessments.includes(a.code)
+                        return (
+                          <label key={a.code} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                            <input type="checkbox" checked={chosenAssessments.includes(a.code)} onChange={() => toggleAssessment(a.code)} />
+                            <span style={{ fontSize: 12, color: '#0A0A0A' }}>{a.label}</span>
+                            {fromJob && <span style={{ fontSize: 9, fontWeight: 700, color: '#6B6B6B', background: '#EAEAEA', padding: '1px 6px', borderRadius: 6, letterSpacing: '0.06em', textTransform: 'uppercase' }}>job default</span>}
+                          </label>
+                        )
+                      })}
                     </div>
                   </div>
                 )}
@@ -184,13 +189,6 @@ export default function InviteCandidate({ jobId, jobLanguage, jobAssessments, jo
       </form>
     </div>
   )
-}
-
-function sameSet(a: string[], b: string[]): boolean {
-  if (a.length !== b.length) return false
-  const setA = new Set(a)
-  for (const x of b) if (!setA.has(x)) return false
-  return true
 }
 
 const inputStyle: React.CSSProperties = {

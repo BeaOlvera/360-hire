@@ -8,15 +8,16 @@ type OpenJob = { id: string; title: string; assessments: string[]; competencies:
 
 type Props = { candidateId: string; openJobs: OpenJob[] }
 
-const ASSESSMENT_LABELS: Record<string, string> = {
-  thinking_style:     'Thinking Style',
-  growth_orientation: 'Growth Orientation',
-  career_values:      'Career Values',
-  culture_fit:        'Culture Fit (OCAI)',
-  big_five:           'Big Five Personality',
-  icar_reasoning:     'Reasoning (ICAR-style)',
-  resilience:         'Resilience',
-}
+const ALL_ASSESSMENTS: Array<{ code: string; label: string }> = [
+  { code: 'thinking_style',     label: 'Thinking Style' },
+  { code: 'growth_orientation', label: 'Growth Orientation' },
+  { code: 'career_values',      label: 'Career Values' },
+  { code: 'culture_fit',        label: 'Culture Fit (OCAI)' },
+  { code: 'big_five',           label: 'Big Five Personality' },
+  { code: 'icar_reasoning',     label: 'Reasoning (ICAR-style)' },
+  { code: 'resilience',         label: 'Resilience' },
+]
+const ALL_ASSESSMENT_CODES = ALL_ASSESSMENTS.map((a) => a.code)
 
 const GENERIC_ASSESSMENTS = ['thinking_style', 'growth_orientation', 'career_values', 'big_five', 'resilience']
 
@@ -32,15 +33,18 @@ export default function CandidateActions({ candidateId, openJobs }: Props) {
   const [chosenAssessments, setChosenAssessments] = useState<string[]>([])
   const [chosenCompetencies, setChosenCompetencies] = useState<string[]>([])
 
-  // Available assessments/competencies depend on whether a specific job is picked
+  // All 7 questionnaires are always offered; competencies depend on the job
   const selectedJob = useMemo(() => openJobs.find((j) => j.id === jobId) ?? null, [openJobs, jobId])
-  const availableAssessments: string[] = selectedJob ? selectedJob.assessments : GENERIC_ASSESSMENTS
   const availableCompetencies: JobCompetency[] = selectedJob ? selectedJob.competencies : []
+  const defaultsForJob = (job: OpenJob | null): string[] => {
+    if (!job) return GENERIC_ASSESSMENTS
+    return job.assessments.length > 0 ? job.assessments : ALL_ASSESSMENT_CODES
+  }
 
   function handleJobChange(newId: string) {
     setJobId(newId)
     const job = openJobs.find((j) => j.id === newId) ?? null
-    setChosenAssessments(job ? job.assessments : GENERIC_ASSESSMENTS)
+    setChosenAssessments(defaultsForJob(job))
     setChosenCompetencies(job ? job.competencies.map((c) => c.name) : [])
     setCustomise(false)
   }
@@ -54,8 +58,8 @@ export default function CandidateActions({ candidateId, openJobs }: Props) {
   function buildOverrides(mode: 'job' | 'generic') {
     if (!customise) return {}
     const out: Record<string, unknown> = {}
-    const defaults = mode === 'job' ? (selectedJob?.assessments ?? []) : GENERIC_ASSESSMENTS
-    if (!sameSet(chosenAssessments, defaults)) out.assessments_override = chosenAssessments
+    // Always send the explicit selection — admin may have broadened beyond job defaults
+    out.assessments_override = chosenAssessments
     if (mode === 'job') {
       const chosenObjs = (selectedJob?.competencies ?? []).filter((c) => chosenCompetencies.includes(c.name))
       if (chosenObjs.length !== (selectedJob?.competencies.length ?? 0)) out.competencies_override = chosenObjs
@@ -86,7 +90,7 @@ export default function CandidateActions({ candidateId, openJobs }: Props) {
     }
   }
 
-  const hasAssessments = availableAssessments.length > 0
+  const hasAssessments = true
   const hasCompetencies = availableCompetencies.length > 0
 
   return (
@@ -120,12 +124,16 @@ export default function CandidateActions({ candidateId, openJobs }: Props) {
                 <div>
                   <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', color: '#6B6B6B', textTransform: 'uppercase', marginBottom: 8 }}>Questionnaires</p>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                    {availableAssessments.map((code) => (
-                      <label key={code} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                        <input type="checkbox" checked={chosenAssessments.includes(code)} onChange={() => toggleAssessment(code)} />
-                        <span style={{ fontSize: 12, color: '#0A0A0A' }}>{ASSESSMENT_LABELS[code] ?? code}</span>
-                      </label>
-                    ))}
+                    {ALL_ASSESSMENTS.map((a) => {
+                      const fromJob = selectedJob ? selectedJob.assessments.includes(a.code) : false
+                      return (
+                        <label key={a.code} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                          <input type="checkbox" checked={chosenAssessments.includes(a.code)} onChange={() => toggleAssessment(a.code)} />
+                          <span style={{ fontSize: 12, color: '#0A0A0A' }}>{a.label}</span>
+                          {fromJob && <span style={{ fontSize: 9, fontWeight: 700, color: '#6B6B6B', background: '#EAEAEA', padding: '1px 6px', borderRadius: 6, letterSpacing: '0.06em', textTransform: 'uppercase' }}>job default</span>}
+                        </label>
+                      )
+                    })}
                   </div>
                 </div>
               )}
@@ -176,9 +184,3 @@ export default function CandidateActions({ candidateId, openJobs }: Props) {
   )
 }
 
-function sameSet(a: string[], b: string[]): boolean {
-  if (a.length !== b.length) return false
-  const setA = new Set(a)
-  for (const x of b) if (!setA.has(x)) return false
-  return true
-}

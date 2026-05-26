@@ -41,15 +41,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   if (jobError || !job) return NextResponse.json({ error: 'Job not found' }, { status: 404 })
   if (job.status !== 'open') return NextResponse.json({ error: 'Job is not open' }, { status: 400 })
 
-  // Validate assessments_override is a subset of job's assessments
-  if (assessmentsOverride) {
-    const jobAssessments: string[] = Array.isArray(job.assessments) ? job.assessments : []
-    for (const code of assessmentsOverride) {
-      if (!jobAssessments.includes(code)) {
-        return NextResponse.json({ error: `Assessment ${code} is not enabled for this job` }, { status: 400 })
-      }
-    }
-  }
+  // Admin can broaden the questionnaire set per candidate beyond the job's defaults; no subset check.
 
   const normalizedEmail = email.trim().toLowerCase()
 
