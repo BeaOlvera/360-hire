@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Guía de prueba — 360 Hire</title>
+<style>
+  :root {
+    --ink:        #0A0A0A;
+    --mid:        #3F3F3F;
+    --muted:      #6B6B6B;
+    --faint:      #AEABA3;
+    --line:       #E2E0DA;
+    --paper:      #FFFFFF;
+    --cream:      #F5F4F0;
+    --soft:       #EAEAEA;
+    --alert:      #9B2335;
+    --alert-bg:   #FBEAEC;
+    --alert-line: #F5C5CB;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--cream);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+    font-size: 15px;
+  }
+  .wrap {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 56px 28px 80px;
+  }
+  header {
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 28px;
+    margin-bottom: 36px;
+  }
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--faint);
+    text-transform: uppercase;
+    margin: 0 0 10px;
+  }
+  h1 {
+    font-size: 32px;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+    margin: 0 0 10px;
+    font-weight: 700;
+  }
+  .lede {
+    font-size: 15px;
+    color: var(--muted);
+    margin: 0;
+  }
+  section { margin-bottom: 40px; }
+  h2 {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: var(--faint);
+    text-transform: uppercase;
+    margin: 0 0 14px;
+  }
+  h3 {
+    font-size: 20px;
+    letter-spacing: -0.2px;
+    margin: 0 0 14px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  p { margin: 0 0 12px; color: var(--mid); }
+  p strong { color: var(--ink); }
+  ol, ul { padding-left: 22px; margin: 0 0 14px; color: var(--mid); }
+  ol li, ul li { margin-bottom: 8px; }
+  ol li strong, ul li strong { color: var(--ink); }
+  a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+  code, pre {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 13px;
+  }
+  code {
+    background: var(--soft);
+    color: var(--ink);
+    padding: 1px 6px;
+    border-radius: 6px;
+  }
+  pre {
+    background: var(--ink);
+    color: #F0EEE8;
+    padding: 14px 16px;
+    border-radius: 10px;
+    overflow-x: auto;
+    line-height: 1.5;
+    margin: 0 0 14px;
+  }
+  pre code { background: transparent; color: inherit; padding: 0; }
+  .card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 22px 26px;
+    margin-bottom: 16px;
+  }
+  .card.alert {
+    background: var(--alert-bg);
+    border-color: var(--alert-line);
+  }
+  .card.alert h3 { color: var(--alert); }
+  .card.alert p { color: var(--alert); }
+  .pill {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--mid);
+    background: var(--soft);
+    padding: 2px 8px;
+    border-radius: 8px;
+    margin-right: 4px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    font-size: 14px;
+  }
+  th, td {
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+    color: var(--mid);
+  }
+  th {
+    background: var(--cream);
+    color: var(--faint);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { color: var(--ink); font-weight: 600; width: 32%; }
+  footer {
+    border-top: 1px solid var(--line);
+    margin-top: 48px;
+    padding-top: 20px;
+    text-align: center;
+    color: var(--faint);
+    font-size: 12px;
+  }
+  @media (max-width: 600px) {
+    .wrap { padding: 32px 18px 56px; }
+    h1 { font-size: 26px; }
+    .card { padding: 18px 18px; }
+    table { font-size: 13px; }
+    th, td { padding: 10px 12px; }
+    td:first-child { width: auto; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Guía de prueba</p>
+  <h1>360 Hire — qué es y cómo probarlo</h1>
+  <p class="lede">Una guía paso a paso para entender la plataforma y validar el flujo completo, desde la creación de un puesto hasta el informe final del candidato.</p>
+</header>
+
+<section>
+  <h2>0 · Antes de empezar</h2>
+  <div class="card">
+    <ul>
+      <li><strong>URL:</strong> <a href="https://360-hire.vercel.app">https://360-hire.vercel.app</a></li>
+      <li><strong>Contraseña de admin:</strong> pídesela a Bea (se introduce una sola vez al entrar en <code>/admin</code>).</li>
+      <li><strong>Correo de prueba:</strong> usa una dirección a la que tengas acceso para recibir el correo de invitación del candidato. Te servirá tu propio Gmail u Outlook.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2>1 · ¿Qué es 360 Hire?</h2>
+  <p>Es una plataforma para evaluar candidatos. Tú creas un puesto, invitas a una persona por correo y ella sube su CV, contesta unos cuestionarios y mantiene una entrevista por chat (y voz, si quiere) con un asistente de inteligencia artificial. Después tú, como administrador, ves un informe completo con su encaje cultural, su perfil de personalidad, su razonamiento, su resiliencia y un resumen ejecutivo con recomendación de contratación.</p>
+</section>
+
+<section>
+  <h2>2 · Entrar como administrador</h2>
+  <ol>
+    <li>Abre <a href="https://360-hire.vercel.app/admin">https://360-hire.vercel.app/admin</a>.</li>
+    <li>Introduce la contraseña de admin.</li>
+    <li>Llegas al <strong>panel</strong> con la lista de puestos abiertos.</li>
+  </ol>
+</section>
+
+<section>
+  <h2>3 · Crear un puesto de prueba</h2>
+  <ol>
+    <li>Pulsa <strong>«Nuevo puesto»</strong> (botón arriba a la derecha del dashboard).</li>
+    <li>Tienes dos formas de rellenarlo:
+      <ul>
+        <li><strong>Opción A — Subir un PDF</strong> con la descripción del puesto. Pulsa «Upload JD» y la IA extrae título, descripción, nivel, idioma y competencias sugeridas. Revísalo todo antes de guardar.</li>
+        <li><strong>Opción B — Rellenarlo a mano</strong>: título, descripción, nivel, idioma de la entrevista (EN/ES) y hiring manager.</li>
+      </ul>
+    </li>
+    <li><strong>Competencias.</strong> Hay un botón <strong>«+ Pick from library»</strong> que abre el diccionario de competencias de Zephyron (Results Focus, Commercial Orientation, Innovation, etc., diez en total). Cada competencia añade su nombre y los comportamientos que el entrevistador IA va a explorar. También puedes añadir competencias libres con «+ Add custom competency». Marca cada una como <span class="pill">Critical</span> <span class="pill">Important</span> <span class="pill">Relevant</span> según su peso.</li>
+    <li><strong>Cuestionarios complementarios.</strong> Marca los que quieras que el candidato haga (Thinking Style, Growth, Career Values, Culture Fit, Big Five, Reasoning ICAR, Resilience). Puedes dejarlos sin marcar y elegirlos después candidato a candidato.</li>
+    <li><strong>Perfil de cultura de la empresa (OCAI).</strong> Aparece siempre. Reparte 100 puntos entre los cuatro cuadrantes (Clan, Adhocracy, Market, Hierarchy) describiendo cómo es la cultura para este puesto. Solo se usa si activas el cuestionario «Culture Fit», pero conviene dejarlo definido.</li>
+    <li>Pulsa <strong>«Create job»</strong>. Te lleva a la ficha del puesto.</li>
+  </ol>
+</section>
+
+<section>
+  <h2>4 · Invitar a un candidato</h2>
+  <p>Dentro de la ficha del puesto verás un bloque <strong>«Invite a candidate»</strong>.</p>
+  <ol>
+    <li>Rellena nombre, apellido, correo electrónico y elige idioma (EN/ES).</li>
+    <li><strong>Para probar la personalización</strong>, marca la casilla <strong>«Customise for this candidate»</strong>. Se despliega una sección con dos columnas:
+      <ul>
+        <li><strong>Questionnaires for this candidate.</strong> Aparecen los 7 cuestionarios. Los que el puesto tenga activados por defecto llevan una etiqueta <span class="pill">job default</span>. Puedes marcar o desmarcar los que quieras para <em>esta persona en concreto</em>.</li>
+        <li><strong>Competencies to explore.</strong> Aparecen las competencias del puesto. Si no quieres que el entrevistador profundice en alguna, desmárcala.</li>
+      </ul>
+    </li>
+    <li>Si no marcas «Customise», se envía la configuración completa del puesto.</li>
+    <li>Pulsa <strong>«Invite candidate»</strong>. El candidato recibe un correo de <strong>Zephyron Consulting &lt;hire@zephyronconsulting.com&gt;</strong> con un enlace personal.</li>
+  </ol>
+  <div class="card">
+    <h3 style="font-size: 14px; margin-bottom: 8px;">Alternativa: evaluación genérica</h3>
+    <p style="margin: 0;">Puedes evaluar a alguien sin tener un puesto concreto. Entra en <code>/admin/candidates</code>, crea un candidato y pulsa <strong>«Start generic evaluation»</strong>. El correo es genérico («te vamos a evaluar para encajar en proyectos y oportunidades», no menciona ningún puesto en particular).</p>
+  </div>
+</section>
+
+<section>
+  <h2>5 · Lo que ve el candidato</h2>
+  <p>Abre el enlace del correo <strong>en una pestaña de incógnito</strong> (para no mezclar la sesión de admin) y sigue el flujo como si fueras la persona invitada:</p>
+  <ol>
+    <li><strong>Aviso de privacidad y consentimiento.</strong> Debe aceptarlo para continuar.</li>
+    <li><strong>Vista general</strong> del proceso: cuántos cuestionarios, tiempo estimado, etc.</li>
+    <li><strong>Sube el CV</strong> (PDF, máximo 15 MB).</li>
+    <li><strong>Cuestionarios.</strong> Los que tú hayas activado para él. Cada uno tarda entre 2 y 8 minutos:
+      <ul>
+        <li>Thinking Style — estilo de pensamiento, 4 cuadrantes</li>
+        <li>Growth Orientation — mentalidad de crecimiento</li>
+        <li>Career Values — anclas de carrera</li>
+        <li>Culture Fit OCAI — reparto de 100 puntos</li>
+        <li>Big Five — personalidad IPIP</li>
+        <li>ICAR Reasoning — capacidad cognitiva, con respuestas correctas</li>
+        <li>Resilience — recuperación ante la adversidad</li>
+      </ul>
+    </li>
+    <li><strong>Entrevista por chat con IA.</strong> Pregunta por las competencias del puesto. El candidato puede escribir o hablar (icono de micrófono). La IA responde por texto y, si está activado, por voz.</li>
+    <li><strong>Cierre.</strong> La IA hace una última pregunta abierta y agradece. El candidato ve «evaluación completada».</li>
+  </ol>
+</section>
+
+<section>
+  <h2>6 · Revisar la evaluación como admin</h2>
+  <p>Vuelve a la pestaña de admin, entra en la ficha del candidato (o desde el puesto → la fila del candidato).</p>
+  <ol>
+    <li><strong>Job-fit score:</strong> porcentaje de encaje calculado a partir del CV, las competencias y la entrevista.</li>
+    <li><strong>Informe completo:</strong> pulsa «Generate comprehensive report». Tarda unos segundos. Obtienes un HTML con:
+      <ul>
+        <li>Resumen ejecutivo y recomendación</li>
+        <li>Encaje por competencia</li>
+        <li>Perfil de personalidad</li>
+        <li>Razonamiento</li>
+        <li>Resiliencia</li>
+        <li>Encaje cultural (comparado con el perfil OCAI del puesto)</li>
+        <li>Transcripción de la entrevista</li>
+      </ul>
+    </li>
+    <li><strong>Botón «Resend email»</strong> en la tarjeta del enlace, por si el candidato dice no haber recibido la invitación.</li>
+    <li><strong>Botón «Copy»</strong> para copiar el enlace directo del candidato y enviárselo por otra vía (WhatsApp, etc.).</li>
+  </ol>
+</section>
+
+<section>
+  <h2>7 · Ejemplos disponibles</h2>
+  <p>Si quieres ver cómo queda un informe sin pasar por todo el flujo: en el dashboard hay un enlace <strong>«Samples»</strong> (también <code>/admin/samples</code>) con informes congelados de candidatos ficticios en las 9 variantes (sénior con buen encaje, perfil mixto, candidato no idóneo, etc.).</p>
+</section>
+
+<section>
+  <h2>8 · Casos que conviene probar</h2>
+  <table>
+    <thead>
+      <tr><th>Caso</th><th>Qué probar</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Crear puesto desde PDF</td><td>Sube un JD en PDF y revisa que la extracción acierta título, idioma y competencias.</td></tr>
+      <tr><td>Crear puesto en español</td><td>Que el correo y la entrevista salgan en castellano con tildes y signos <code>¿</code> <code>¡</code>.</td></tr>
+      <tr><td>Personalizar por candidato</td><td>Invita dos candidatos al mismo puesto: a uno márcale solo 3 cuestionarios y a otro los 7. Verifica que cada uno solo ve lo que le tocó.</td></tr>
+      <tr><td>Evaluación genérica</td><td>Crea un candidato sin puesto, lánzale una evaluación genérica y comprueba que el correo no menciona ningún puesto concreto.</td></tr>
+      <tr><td>Entrevista por voz</td><td>En la entrevista, prueba el micrófono y comprueba que transcribe bien.</td></tr>
+      <tr><td>Reenviar invitación</td><td>Pulsa «Resend email» y verifica que vuelve a llegar.</td></tr>
+      <tr><td>Volver atrás</td><td>Desde la ficha del candidato, usa el breadcrumb (All jobs · Job · Candidate profile). No debe dar 404.</td></tr>
+      <tr><td>Cultura del puesto</td><td>Crea un puesto con un reparto OCAI marcado (por ejemplo 40/30/20/10), invita a alguien con Culture Fit activado y mira el informe: debe comparar las dos distribuciones.</td></tr>
+      <tr><td>Competencias del diccionario</td><td>Crea un puesto eligiendo solo competencias del diccionario y verifica que la entrevista pregunta por los comportamientos correspondientes.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>9 · Si algo da error</h2>
+
+  <div class="card alert">
+    <h3>«Página no encontrada (404)» al abrir el enlace del candidato</h3>
+    <p>Significa que la base de datos todavía no tiene aplicada la migración 007. Avísale a Bea para que ejecute en Supabase:</p>
+<pre><code>ALTER TABLE applications
+  ADD COLUMN IF NOT EXISTS assessments_override JSONB,
+  ADD COLUMN IF NOT EXISTS competencies_override JSONB;</code></pre>
+  </div>
+
+  <div class="card">
+    <h3 style="font-size: 14px;">No llega el correo</h3>
+    <p style="margin: 0;">Revisa la carpeta de spam. Si sigue sin llegar, usa el botón <strong>«Copy»</strong> o <strong>«Resend email»</strong> desde la ficha del candidato.</p>
+  </div>
+
+  <div class="card">
+    <h3 style="font-size: 14px;">Cualquier otro error</h3>
+    <p style="margin: 0;">Anota qué hiciste (paso a paso) y mándale a Bea una captura de pantalla.</p>
+  </div>
+</section>
+
+<footer>
+  ¡Suerte con la prueba! Cualquier sugerencia es bienvenida.
+</footer>
+
+</div>
+</body>
+</html>
