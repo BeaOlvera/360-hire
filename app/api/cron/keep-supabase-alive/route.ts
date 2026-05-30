@@ -20,6 +20,9 @@ import { NextRequest, NextResponse } from 'next/server'
 const DEV_360_HIRE_ANON =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxya3hhdXFsbHZ2cHJ3ZmprdGFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyOTE1NDEsImV4cCI6MjA5NDg2NzU0MX0.f6uOXolQnoRBrpfogOH3lfgDmz8QyUFn4KdMNuYo_aM'
 
+const CLIMATE_APP_ANON =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imthb2lydXd2bWJqbnljeWt3dGxvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1NTk3ODAsImV4cCI6MjA5MzEzNTc4MH0.iJsqyxWTN5GZkvkeokvdzzCRtwmTZJZcLZuYWKFDQYk'
+
 type Target = { name: string; ref: string; apikey: string | null }
 
 function buildTargets(): Target[] {
@@ -27,7 +30,7 @@ function buildTargets(): Target[] {
     {
       name: 'climate-app',
       ref: 'kaoiruwvmbjnycykwtlo',
-      apikey: process.env.SUPABASE_CLIMATE_ANON_KEY ?? null,
+      apikey: CLIMATE_APP_ANON,
     },
     {
       name: 'dev-360-hire',
