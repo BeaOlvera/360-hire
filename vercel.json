@@ -9,5 +9,11 @@
     "app/api/apply/[token]/cv/route.ts":                      { "maxDuration": 30 },
     "app/api/apply/[token]/transcribe/route.ts":              { "maxDuration": 30 },
     "app/api/apply/[token]/video/route.ts":                   { "maxDuration": 60 }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/keep-supabase-alive",
+      "schedule": "0 9 */5 * *"
+    }
+  ]
 }
