@@ -4,15 +4,23 @@ import { Resend } from 'resend'
  * Email-safe wordmark. Inline SVG is blocked by Gmail / Outlook / iOS Mail,
  * so we render the wordmark as a tiny HTML table that all email clients support:
  * two text cells separated by a thin vertical rule. System fonts only, no @font-face.
+ *
+ * Optional `company` subtitle surfaces the hiring company's name below the
+ * platform wordmark, so the email reads as "Zephyron|Hire · ACME Corp" instead
+ * of just platform branding.
  */
-function emailLogoHtml(): string {
-  return `<table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin:0 0 22px 0;">
+function emailLogoHtml(company?: string | null): string {
+  const wordmark = `<table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
     <tr>
       <td style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-weight:800;font-size:24px;line-height:24px;color:#0A0A0A;letter-spacing:-0.6px;padding:0;">Zephyron</td>
       <td style="padding:0 10px;"><div style="width:1px;height:22px;background:#AEABA3;line-height:22px;font-size:0;">&nbsp;</div></td>
       <td style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-weight:400;font-size:24px;line-height:24px;color:#6B6B6B;letter-spacing:-0.2px;padding:0;">Hire</td>
     </tr>
   </table>`
+  const subtitle = company
+    ? `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;font-weight:600;color:#0A0A0A;margin-top:10px;">For <strong style="font-weight:700;">${company}</strong></div>`
+    : ''
+  return `<div style="margin:0 0 22px 0;padding-bottom:18px;border-bottom:1px solid #E2E0DA;">${wordmark}${subtitle}</div>`
 }
 
 export async function sendCandidateInvite(
@@ -49,7 +57,7 @@ function bodyJobEn(name: string, jobTitle: string, company: string | null, url: 
   const company_line = company ? ` at ${company}` : ''
   return `
   <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; color: #0A0A0A;">
-    ${emailLogoHtml()}
+    ${emailLogoHtml(company)}
     <p>Hello ${name},</p>
     <p>Thank you for your interest in the <strong>${jobTitle}</strong> role${company_line}. As part of the selection process, we'd like you to complete a short conversational interview with our AI interviewer.</p>
     <p>The interview takes about 30 to 45 minutes. You can speak or type your answers, the choice is yours. The session is recorded so the hiring team can review it later, and your responses are used only for this assessment.</p>
@@ -66,7 +74,7 @@ function bodyJobEs(name: string, jobTitle: string, company: string | null, url: 
   const company_line = company ? ` en ${company}` : ''
   return `
   <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; color: #0A0A0A;">
-    ${emailLogoHtml()}
+    ${emailLogoHtml(company)}
     <p>Hola ${name},</p>
     <p>Gracias por tu interés en el puesto de <strong>${jobTitle}</strong>${company_line}. Como parte del proceso de selección, nos gustaría que completaras una entrevista conversacional con nuestra entrevistadora de IA.</p>
     <p>La entrevista dura aproximadamente entre 30 y 45 minutos. Puedes responder hablando o escribiendo, tú eliges. La sesión se graba para que el equipo de selección pueda revisarla más tarde, y tus respuestas se usan únicamente para esta evaluación.</p>

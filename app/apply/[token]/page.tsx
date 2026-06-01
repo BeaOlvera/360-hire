@@ -20,12 +20,27 @@ async function getContext(token: string) {
     .select(`
       id, status, cv_url, completed_at, assessments_override, competencies_override,
       jobs ( title, language, assessments ),
-      candidates ( first_name, surname1, surname2, preferred_language )
+      candidates ( first_name, surname1, surname2, preferred_language, email )
     `)
     .eq('token', token)
     .single()
 
-  if (error || !app) return null
+  if (error || !app) {
+    // Diagnostic: log every miss so we can tell if a candidate's link is
+    // resolving to a stale/wrong application (partner reported this).
+    console.warn('[apply] token miss', { token: token.slice(0, 8) + '...', error })
+    return null
+  }
+  // Diagnostic: log every successful resolution so we can trace the case
+  // where two different invitation emails resolve to the same applicationId.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const _cand = app.candidates as any
+  console.log('[apply] resolve', {
+    token: token.slice(0, 8) + '...',
+    application_id: app.id,
+    candidate_email: _cand?.email ?? null,
+    status: app.status,
+  })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const job = app.jobs as any

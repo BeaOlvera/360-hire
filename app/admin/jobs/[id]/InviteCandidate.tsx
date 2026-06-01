@@ -73,7 +73,11 @@ export default function InviteCandidate({ jobId, jobLanguage, jobAssessments, jo
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error ?? 'Failed to invite candidate'); return }
-      setSuccess('Candidate invited. Email sent.')
+      if (data.already_invited) {
+        setSuccess('Heads up: this candidate already had an evaluation for this job. The SAME existing link was resent — their progress is preserved. If you want a fresh start, open the candidate and use "Reset interview".')
+      } else {
+        setSuccess('Candidate invited. Email sent.')
+      }
       setFirstName(''); setSurname1(''); setEmail('')
       router.refresh()
     } catch {

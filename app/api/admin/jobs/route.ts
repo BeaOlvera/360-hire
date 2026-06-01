@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
   let body: any
   try { body = await request.json() } catch { return NextResponse.json({ error: 'Invalid body' }, { status: 400 }) }
 
-  const { title, description, org_level, language, hiring_manager, assessments, culture_profile, competencies } = body
+  const { title, description, org_level, language, hiring_manager, company_name, assessments, culture_profile, competencies } = body
   if (!title?.trim() || !description?.trim()) {
     return NextResponse.json({ error: 'Title and description are required' }, { status: 400 })
   }
@@ -60,6 +60,7 @@ export async function POST(request: NextRequest) {
       org_level: org_level ?? null,
       language,
       hiring_manager: hiring_manager ?? null,
+      company_name: typeof company_name === 'string' ? company_name.trim().slice(0, 120) || null : null,
       assessments: cleanAssessments,
       culture_profile: cleanCulture,
       competencies: cleanCompetencies,

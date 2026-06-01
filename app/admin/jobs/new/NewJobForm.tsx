@@ -26,6 +26,7 @@ export default function NewJobForm() {
   const [orgLevel, setOrgLevel] = useState('Individual contributor')
   const [language, setLanguage] = useState<'en' | 'es'>('en')
   const [hiringManager, setHiringManager] = useState('')
+  const [companyName, setCompanyName] = useState('')
   const [assessments, setAssessments] = useState<string[]>([])
   const [culture, setCulture] = useState<Culture>({ CLAN: 25, ADHOCRACY: 25, MARKET: 25, HIERARCHY: 25 })
   const [comps, setComps] = useState<Competency[]>([])
@@ -83,6 +84,7 @@ export default function NewJobForm() {
           org_level: orgLevel,
           language,
           hiring_manager: hiringManager.trim() || null,
+          company_name: companyName.trim() || null,
           assessments,
           culture_profile: cultureTotal === 100 ? culture : null,
           competencies: comps
@@ -151,9 +153,14 @@ export default function NewJobForm() {
         </Field>
       </div>
 
-      <Field label="Hiring manager (optional)">
-        <input value={hiringManager} onChange={(e) => setHiringManager(e.target.value)} placeholder="Name shown on the dashboard" style={inputStyle} />
-      </Field>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+        <Field label="Company name (optional)" hint="Shown in the candidate's invitation email below the platform wordmark.">
+          <input value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="e.g. ACME Corp" style={inputStyle} />
+        </Field>
+        <Field label="Hiring manager (optional)">
+          <input value={hiringManager} onChange={(e) => setHiringManager(e.target.value)} placeholder="Name shown on the dashboard" style={inputStyle} />
+        </Field>
+      </div>
 
       <Field label="Competencies for the in-depth interview" hint="The AI interviewer will probe each competency at the depth you set: Critical = 2-3 detailed incidents, Important = 1-2 incidents, Relevant = at least 1 example. Leave empty to let the AI extract them from the JD.">
         <CompetenciesEditor comps={comps} onChange={setComps} />

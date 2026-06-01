@@ -51,7 +51,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   if (jobId) {
     const { data: j, error: jErr } = await supabaseAdmin
       .from('jobs')
-      .select('id, title, language, status, assessments, competencies')
+      .select('id, title, language, status, assessments, competencies, company_name')
       .eq('id', jobId)
       .single()
     if (jErr || !j) return NextResponse.json({ error: 'Job not found' }, { status: 404 })
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       const fullName = [candidate.first_name, candidate.surname1].filter(Boolean).join(' ')
       const lang: 'en' | 'es' = candidate.preferred_language === 'es' ? 'es' : 'en'
       const titleForEmail = job?.title ?? ''
-      await sendCandidateInvite(candidate.email, fullName, titleForEmail, null, token, appUrl, lang, !job)
+      await sendCandidateInvite(candidate.email, fullName, titleForEmail, job?.company_name ?? null, token, appUrl, lang, !job)
     } catch (err) {
       console.error('Invite email failed:', err)
     }

@@ -43,6 +43,12 @@ export default function CandidateLinkCard({ applicationId, token, candidateEmail
   }
 
   async function handleResend() {
+    // Confirm WHICH email gets the resend, so the admin doesn't accidentally
+    // re-trigger the wrong candidate's link (partner reported confusion).
+    const target = candidateEmail ?? '(unknown email)'
+    if (!window.confirm(`Resend the invitation email to ${target}? This sends the SAME interview link as before, not a new one.`)) {
+      return
+    }
     setResending(true); setResendMsg(''); setResendErr('')
     try {
       const res = await fetch(`/api/admin/applications/${applicationId}/resend-invite`, { method: 'POST' })
@@ -61,6 +67,7 @@ export default function CandidateLinkCard({ applicationId, token, candidateEmail
       <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.15em', color: '#AEABA3', textTransform: 'uppercase', marginBottom: 10 }}>Candidate link</p>
       <p style={{ fontSize: 11, color: '#6B6B6B', lineHeight: 1.5, marginBottom: 10 }}>
         Share this link with the candidate to start the evaluation. You can also resend the original invitation email at any point as a reminder.
+        {candidateEmail && <span> Linked to <strong style={{ color: '#0A0A0A' }}>{candidateEmail}</strong>.</span>}
       </p>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
         <input readOnly value={url}

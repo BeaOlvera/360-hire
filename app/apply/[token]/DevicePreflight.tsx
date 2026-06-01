@@ -76,9 +76,15 @@ export default function DevicePreflight({ token, language, onReady }: Props) {
     } catch { /* ignore */ }
   }, [token])
 
-  // When camId changes, re-acquire the stream with the new device
+  // When camId/micId changes, re-acquire the stream with the new device.
+  // Guard against firing immediately after requestAccess() (which already has
+  // a live stream with the same device): only re-acquire if the active stream's
+  // device IDs differ from the target IDs.
   useEffect(() => {
     if (state !== 'ready' || !camId) return
+    const activeVideoId = streamRef.current?.getVideoTracks()[0]?.getSettings().deviceId
+    const activeAudioId = streamRef.current?.getAudioTracks()[0]?.getSettings().deviceId
+    if (activeVideoId === camId && (!micId || activeAudioId === micId)) return
     let cancelled = false
     ;(async () => {
       try {
@@ -95,7 +101,11 @@ export default function DevicePreflight({ token, language, onReady }: Props) {
       }
     })()
     return () => { cancelled = true }
-  }, [camId, micId, state])
+    // Intentionally omit `state` from deps — once we're in 'ready' the effect
+    // is only meaningful for device-id changes, and including `state` causes
+    // an unnecessary re-acquire immediately after requestAccess().
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [camId, micId])
 
   // Clean up on unmount
   useEffect(() => {

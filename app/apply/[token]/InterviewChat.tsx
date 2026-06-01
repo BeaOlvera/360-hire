@@ -100,7 +100,6 @@ export default function InterviewChat({
   const recordTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const lastSpokenIndexRef = useRef<number>(-1)
   const ttsAudioRef = useRef<HTMLAudioElement | null>(null)
-  const pendingTtsUrlRef = useRef<string | null>(null)
   const [ttsBlocked, setTtsBlocked] = useState(false)
   // TTS is now server-side (OpenAI tts-1). Always available unless the route
   // returns 503 (server has no OPENAI_API_KEY) — handled lazily on first use.
@@ -326,10 +325,11 @@ export default function InterviewChat({
           await audio.play()
           setTtsBlocked(false)
         } catch (playErr) {
-          // Browsers block autoplay until first user gesture. Surface a
-          // play button so the candidate can manually enable the voice.
+          // Browsers block autoplay until first user gesture. The audio
+          // element already has its `src` set, so the manual play button
+          // can call audio.play() on ttsAudioRef.current directly — no
+          // need to stash the URL.
           console.warn('TTS autoplay blocked', playErr)
-          pendingTtsUrlRef.current = url
           setTtsBlocked(true)
         }
       } catch {
@@ -384,7 +384,11 @@ export default function InterviewChat({
     } catch {
       setError(t.conn_error); setMessages((prev) => prev.slice(0, -1)); setInput(text)
     } finally {
-      setIsTyping(false); inputRef.current?.focus()
+      // Note: do NOT focus inputRef here. The textarea is still rendered as
+      // disabled until React flushes the setIsTyping(false) update. The
+      // [canType, inputMode, messages.length] useEffect with rAF handles focus
+      // correctly on the next paint, after the textarea is re-enabled.
+      setIsTyping(false)
     }
   }
 
@@ -419,15 +423,56 @@ export default function InterviewChat({
   async function startRecording() {
     setError('')
     if (!sttAvailable) { setError(t.mic_unsupported); return }
-    if (ttsAvailable) window.speechSynthesis.cancel()
+    // Cancel any in-progress TTS playback so it doesn't bleed into the mic recording
+    if (ttsAudioRef.current) { try { ttsAudioRef.current.pause() } catch { /* ignore */ } }
+
+    // Race-condition guard: if the user taps Record before startVideo() has
+    // finished acquiring the camera, videoStreamRef may still be null.
+    // Wait up to 3s for the video stream to be ready, UNLESS the candidate
+    // opted out of video (preflight `skip:true`), in which case go straight
+    // to a fresh audio-only stream.
+    let preflightSkipped = false
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const raw = localStorage.getItem(`preflight-${token}`)
+      if (raw) preflightSkipped = JSON.parse(raw)?.skip === true
+    } catch { /* ignore */ }
+    if (!preflightSkipped) {
+      let waited = 0
+      while (!videoStreamRef.current && waited < 3000) {
+        await new Promise((r) => setTimeout(r, 100))
+        waited += 100
+      }
+    }
+
+    try {
+      // CRITICAL: the video MediaRecorder (started in startVideo()) already
+      // holds the microphone. Calling getUserMedia({audio:true}) a second time
+      // while the video stream owns the mic can return a SILENT track on
+      // Windows / Safari / Chrome mobile (this was the partner's STT failure).
+      // Reuse the existing audio track instead — wrap it in a fresh MediaStream
+      // so the MediaRecorder owns its lifecycle independently.
+      let stream: MediaStream
+      const existingAudioTracks = videoStreamRef.current?.getAudioTracks() ?? []
+      if (existingAudioTracks.length > 0 && existingAudioTracks[0].readyState === 'live') {
+        // Safari quirk: two MediaRecorders sharing the same underlying audio
+        // track can interfere with each other (one stopping mutes the other).
+        // .clone() returns an INDEPENDENT track over the same mic, so the STT
+        // recorder can be stopped safely without affecting the video recorder.
+        stream = new MediaStream([existingAudioTracks[0].clone()])
+      } else {
+        // Fallback path: video was skipped or the stream genuinely failed to
+        // start. Get a fresh mic — no conflict because nothing else owns it.
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      }
       audioChunksRef.current = []
       const mime = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : ''
       const rec = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream)
       mediaRecorderRef.current = rec
       rec.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data) }
       rec.onstop = async () => {
+        // Stop the cloned/owned tracks. (If we cloned from the video stream,
+        // .clone() gives us a separate track over the same device, so stopping
+        // it leaves the video recording's audio untouched.)
         stream.getTracks().forEach((tr) => tr.stop())
         if (recordTimerRef.current) { clearInterval(recordTimerRef.current); recordTimerRef.current = null }
         setIsRecording(false); setRecordSeconds(0)
@@ -489,7 +534,9 @@ export default function InterviewChat({
       el.setSelectionRange(v.length, v.length)
     })
     return () => cancelAnimationFrame(id)
-  }, [canType, inputMode, messages.length])
+    // isTyping covers the (rare) case where a user message was rolled back on
+    // network error and messages.length didn't change but isTyping flipped.
+  }, [canType, inputMode, messages.length, isTyping])
 
   return (
     <div style={{ minHeight: '100vh', background: '#F5F4F0', display: 'flex', flexDirection: 'column' }}>
@@ -654,13 +701,27 @@ export default function InterviewChat({
               <form onSubmit={sendMessage} style={{ display: 'flex', alignItems: 'flex-end', gap: 10 }}>
                 <textarea
                   ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={handleKeyDown}
-                  disabled={!canType} rows={1} autoFocus
+                  readOnly={!canType} rows={1} autoFocus
+                  onBlur={() => {
+                    // iOS Safari sometimes drops focus when the user taps a
+                    // non-interactive area (the chat scroll region) or when
+                    // an assistant message arrives. Re-focus on the next paint
+                    // so the cursor stays in the textarea between turns.
+                    if (canType) {
+                      requestAnimationFrame(() => inputRef.current?.focus())
+                    }
+                  }}
                   placeholder={messages.length === 0 ? t.placeholder_waiting : t.placeholder_text}
+                  // Intentionally NOT using `disabled`. iOS Safari (and many other
+                  // browsers) drop focus when an element becomes disabled and refuse
+                  // to restore programmatic focus from rAF/useEffect because it is
+                  // not a direct user gesture. With `readOnly`, the cursor stays
+                  // inside the box across every assistant reply.
                   style={{
                     flex: 1, resize: 'none', padding: '10px 14px', border: '1px solid #E2E0DA',
-                    borderRadius: 12, fontSize: 13, color: '#0A0A0A', background: '#FFFFFF',
+                    borderRadius: 12, fontSize: 13, color: '#0A0A0A', background: !canType ? '#F5F4F0' : '#FFFFFF',
                     outline: 'none', fontFamily: 'inherit', lineHeight: 1.5, minHeight: 44, maxHeight: 128,
-                    overflowY: 'auto', opacity: !canType ? 0.5 : 1,
+                    overflowY: 'auto', opacity: !canType ? 0.6 : 1, cursor: !canType ? 'wait' : 'text',
                   }} />
                 <button type="submit" disabled={!input.trim() || !canType}
                   style={{

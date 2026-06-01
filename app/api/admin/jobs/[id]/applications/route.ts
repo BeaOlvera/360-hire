@@ -34,7 +34,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
   const { data: job, error: jobError } = await supabaseAdmin
     .from('jobs')
-    .select('id, title, language, hiring_manager, status, assessments')
+    .select('id, title, language, hiring_manager, company_name, status, assessments')
     .eq('id', params.id)
     .single()
 
@@ -80,8 +80,14 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     .maybeSingle()
 
   let token: string
+  let alreadyInvited = false
   if (existingApp) {
+    // This candidate+job pair already has an application. Re-sending the
+    // invite goes to the SAME application/token so the candidate's progress
+    // is preserved. We flag this in the response so the admin UI can warn
+    // and offer to Reset Interview if they wanted a fresh start.
     token = existingApp.token
+    alreadyInvited = true
     const updatePayload: Record<string, any> = {}
     if (assessmentsOverride) updatePayload.assessments_override = assessmentsOverride
     if (competenciesOverride) updatePayload.competencies_override = competenciesOverride
@@ -105,7 +111,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
   try {
     const fullName = [first_name.trim(), surname1?.trim()].filter(Boolean).join(' ')
-    await sendCandidateInvite(normalizedEmail, fullName, job.title, null, token, appUrl, lang, false)
+    await sendCandidateInvite(normalizedEmail, fullName, job.title, (job as any).company_name ?? null, token, appUrl, lang, false)
   } catch (err) {
     console.error('Invite email failed:', err)
   }
@@ -118,5 +124,5 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     details: { candidate_id: candidateId, email: normalizedEmail, assessments_override: assessmentsOverride ?? undefined, competencies_override: competenciesOverride ? competenciesOverride.length : undefined },
   })
 
-  return NextResponse.json({ ok: true, candidate_id: candidateId, token }, { status: 201 })
+  return NextResponse.json({ ok: true, candidate_id: candidateId, token, already_invited: alreadyInvited }, { status: 201 })
 }

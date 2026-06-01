@@ -16,7 +16,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     .from('applications')
     .select(`
       id, token, status, job_id,
-      jobs ( title ),
+      jobs ( title, company_name ),
       candidates ( first_name, surname1, email, preferred_language )
     `)
     .eq('id', params.id)
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   const titleForEmail = job?.title ?? ''
 
   try {
-    await sendCandidateInvite(candidate.email, fullName, titleForEmail, null, app.token, appUrl, lang, isGeneric)
+    await sendCandidateInvite(candidate.email, fullName, titleForEmail, job?.company_name ?? null, app.token, appUrl, lang, isGeneric)
   } catch (err: any) {
     console.error('Resend invite failed:', err)
     return NextResponse.json({ error: err?.message ?? 'Could not send the email' }, { status: 500 })
