@@ -39,7 +39,7 @@ function bodyJobEn(name: string, jobTitle: string, company: string | null, url: 
     <p>The interview takes about 30 to 45 minutes. You can speak or type your answers, the choice is yours. The session is recorded so the hiring team can review it later, and your responses are used only for this assessment.</p>
     <p>Before you begin, you'll be asked to upload your CV and review the privacy notice.</p>
     <p style="margin: 28px 0;">
-      <a href="${url}" style="background: #0F3D3E; color: #FFFFFF; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: 600;">Start your interview</a>
+      <a href="${url}" style="background: #0A0A0A; color: #FFFFFF; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: 600;">Start your interview</a>
     </p>
     <p style="font-size: 12px; color: #6B6B6B;">If the button does not work, copy this link into your browser: <br/><a href="${url}">${url}</a></p>
     <p style="font-size: 11px; color: #AEABA3; margin-top: 32px;">This link is unique to you. Please do not share it.</p>
@@ -55,7 +55,7 @@ function bodyJobEs(name: string, jobTitle: string, company: string | null, url: 
     <p>La entrevista dura aproximadamente entre 30 y 45 minutos. Puedes responder hablando o escribiendo, tú eliges. La sesión se graba para que el equipo de selección pueda revisarla más tarde, y tus respuestas se usan únicamente para esta evaluación.</p>
     <p>Antes de comenzar, te pediremos que subas tu CV y revises el aviso de privacidad.</p>
     <p style="margin: 28px 0;">
-      <a href="${url}" style="background: #0F3D3E; color: #FFFFFF; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: 600;">Iniciar entrevista</a>
+      <a href="${url}" style="background: #0A0A0A; color: #FFFFFF; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: 600;">Iniciar entrevista</a>
     </p>
     <p style="font-size: 12px; color: #6B6B6B;">Si el botón no funciona, copia este enlace en tu navegador: <br/><a href="${url}">${url}</a></p>
     <p style="font-size: 11px; color: #AEABA3; margin-top: 32px;">Este enlace es único para ti. Por favor no lo compartas.</p>
@@ -70,7 +70,7 @@ function bodyGenericEn(name: string, url: string) {
     <p>The assessment includes a short set of questionnaires followed by a conversational interview with our AI interviewer, about 30 to 45 minutes in total. You can speak or type your answers, the choice is yours.</p>
     <p>Before you begin, you'll be asked to upload your CV and review the privacy notice.</p>
     <p style="margin: 28px 0;">
-      <a href="${url}" style="background: #0F3D3E; color: #FFFFFF; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: 600;">Start the assessment</a>
+      <a href="${url}" style="background: #0A0A0A; color: #FFFFFF; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: 600;">Start the assessment</a>
     </p>
     <p style="font-size: 12px; color: #6B6B6B;">If the button does not work, copy this link into your browser: <br/><a href="${url}">${url}</a></p>
     <p style="font-size: 11px; color: #AEABA3; margin-top: 32px;">This link is unique to you. Please do not share it.</p>
@@ -85,7 +85,7 @@ function bodyGenericEs(name: string, url: string) {
     <p>La evaluación incluye una serie breve de cuestionarios seguida de una entrevista conversacional con nuestra entrevistadora de IA, en total unos 30 a 45 minutos. Puedes responder hablando o escribiendo, tú eliges.</p>
     <p>Antes de comenzar, te pediremos que subas tu CV y revises el aviso de privacidad.</p>
     <p style="margin: 28px 0;">
-      <a href="${url}" style="background: #0F3D3E; color: #FFFFFF; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: 600;">Empezar la evaluación</a>
+      <a href="${url}" style="background: #0A0A0A; color: #FFFFFF; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: 600;">Empezar la evaluación</a>
     </p>
     <p style="font-size: 12px; color: #6B6B6B;">Si el botón no funciona, copia este enlace en tu navegador: <br/><a href="${url}">${url}</a></p>
     <p style="font-size: 11px; color: #AEABA3; margin-top: 32px;">Este enlace es único para ti. Por favor no lo compartas.</p>

@@ -48,6 +48,45 @@ export default function ScoringPanel({
   const [notes, setNotes] = useState<string>(initialReviewNotes ?? '')
   const [report, setReport] = useState<boolean>(hasReport)
   const [savingDecision, setSavingDecision] = useState(false)
+  const [generatingComp, setGeneratingComp] = useState(false)
+
+  async function openComprehensive(refresh: boolean) {
+    setGeneratingComp(true); setError(''); setSuccess('')
+    // Open the tab synchronously (popup-blocker-friendly) with a placeholder.
+    const win = window.open('', '_blank')
+    if (win) {
+      win.document.write(`<!doctype html><meta charset="utf-8"><title>Generating comprehensive report...</title>
+        <style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#F5F4F0;color:#0A0A0A;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}
+        .box{max-width:420px;text-align:center;padding:32px}.spin{width:32px;height:32px;border:3px solid #E2E0DA;border-top-color:#0A0A0A;border-radius:50%;margin:0 auto 18px;animation:r 1s linear infinite}
+        h1{font-size:16px;font-weight:700;margin:0 0 8px}p{font-size:13px;color:#6B6B6B;margin:0;line-height:1.6}
+        @keyframes r{to{transform:rotate(360deg)}}</style>
+        <div class="box"><div class="spin"></div><h1>Generando informe completo</h1>
+        <p>Esto puede tardar 20-40 segundos la primera vez. No cierres esta pestaña.</p></div>`)
+      win.document.close()
+    }
+    try {
+      const qs = refresh ? '?refresh=1' : ''
+      const res = await fetch(`/api/admin/applications/${applicationId}/comprehensive${qs}`)
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        setError(data.error ?? 'Failed to generate comprehensive report')
+        if (win) win.close()
+        return
+      }
+      const html = await res.text()
+      if (win) {
+        win.document.open()
+        win.document.write(html)
+        win.document.close()
+      }
+      setSuccess(refresh ? 'Comprehensive report regenerated.' : 'Comprehensive report ready.')
+    } catch {
+      setError('Connection error generating the comprehensive report.')
+      if (win) win.close()
+    } finally {
+      setGeneratingComp(false)
+    }
+  }
 
   async function handleScore(jobIdOverride?: string) {
     setScoring(true); setError(''); setSuccess('')
@@ -200,10 +239,16 @@ export default function ScoringPanel({
                   style={{ background: '#FFFFFF', color: '#0A0A0A', border: '1px solid #E2E0DA', borderRadius: 10, padding: '9px 14px', fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>
                   Fit report
                 </a>
-                <a href={`/api/admin/applications/${applicationId}/comprehensive`} target="_blank" rel="noopener noreferrer"
-                  style={{ background: '#0A0A0A', color: '#FFFFFF', border: 'none', borderRadius: 10, padding: '9px 14px', fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>
-                  Comprehensive report
-                </a>
+                <button type="button" onClick={() => openComprehensive(false)} disabled={generatingComp}
+                  title="Opens in a new tab; ~30s the first time, instant after that (cached)."
+                  style={{ background: generatingComp ? '#AEABA3' : '#0A0A0A', color: '#FFFFFF', border: 'none', borderRadius: 10, padding: '9px 14px', fontSize: 12, fontWeight: 600, cursor: generatingComp ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}>
+                  {generatingComp ? 'Generating...' : 'Comprehensive report'}
+                </button>
+                <button type="button" onClick={() => openComprehensive(true)} disabled={generatingComp}
+                  title="Force a fresh LLM call (ignores the cached HTML). Costs ~$0.20."
+                  style={{ background: '#FFFFFF', color: '#6B6B6B', border: '1px dashed #E2E0DA', borderRadius: 10, padding: '9px 10px', fontSize: 11, fontWeight: 600, cursor: generatingComp ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}>
+                  ↻ regen
+                </button>
                 <a href={`/api/admin/applications/${applicationId}/report.pdf`} target="_blank" rel="noopener noreferrer"
                   style={{ background: '#FFFFFF', color: '#0A0A0A', border: '1px solid #E2E0DA', borderRadius: 10, padding: '9px 14px', fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>
                   Fit PDF

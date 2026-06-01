@@ -31,6 +31,7 @@ const I18N = {
     mic_unsupported: 'Voice input is not supported in this browser.',
     voice_unconfigured: 'Voice input is not configured on this server. Please use text.',
     tts_unsupported: 'Voice output is not available in this browser.',
+    tts_unavailable: 'Voice output is not configured on this server. Please use text.',
     transcribe_failed: 'Could not transcribe. Try again or switch to text.',
     placeholder_text: 'Type your response... (Enter to send, Shift+Enter for new line)',
     placeholder_waiting: 'Waiting for interviewer...',
@@ -56,6 +57,7 @@ const I18N = {
     mic_unsupported: 'La entrada por voz no es compatible con este navegador.',
     voice_unconfigured: 'La entrada por voz no está configurada en este servidor. Por favor usa texto.',
     tts_unsupported: 'La salida por voz no está disponible en este navegador.',
+    tts_unavailable: 'La voz no está configurada en este servidor. Por favor usa texto.',
     transcribe_failed: 'No se pudo transcribir. Inténtalo de nuevo o cambia a texto.',
     placeholder_text: 'Escribe tu respuesta... (Enter para enviar, Shift+Enter para nueva línea)',
     placeholder_waiting: 'Esperando al entrevistador...',
@@ -94,7 +96,10 @@ export default function InterviewChat({
   const audioChunksRef = useRef<BlobPart[]>([])
   const recordTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const lastSpokenIndexRef = useRef<number>(-1)
-  const ttsAvailable = typeof window !== 'undefined' && 'speechSynthesis' in window
+  const ttsAudioRef = useRef<HTMLAudioElement | null>(null)
+  // TTS is now server-side (OpenAI tts-1). Always available unless the route
+  // returns 503 (server has no OPENAI_API_KEY) — handled lazily on first use.
+  const ttsAvailable = true
   const sttAvailable = typeof window !== 'undefined'
     && typeof navigator !== 'undefined'
     && !!navigator.mediaDevices?.getUserMedia
@@ -144,7 +149,9 @@ export default function InterviewChat({
 
   useEffect(() => {
     return () => {
-      if (ttsAvailable) window.speechSynthesis.cancel()
+      if (ttsAudioRef.current) {
+        try { ttsAudioRef.current.pause(); ttsAudioRef.current.src = '' } catch { /* ignore */ }
+      }
       if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') mediaRecorderRef.current.stop()
       if (recordTimerRef.current) clearInterval(recordTimerRef.current)
       if (snapshotTimerRef.current) clearInterval(snapshotTimerRef.current)
@@ -155,7 +162,7 @@ export default function InterviewChat({
         videoStreamRef.current.getTracks().forEach((tr) => tr.stop())
       }
     }
-  }, [ttsAvailable])
+  }, [])
 
   // Snapshot upload: bundle all chunks so far and overwrite the server-side recording.
   // Used both periodically (every 60s, automatically) AND at completion.
@@ -253,26 +260,57 @@ export default function InterviewChat({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isComplete])
 
+  // Server-side TTS via OpenAI tts-1. We fetch an MP3 for each new assistant
+  // message and play it; one consistent voice ("nova") across the interview.
   useEffect(() => {
-    if (outputMode !== 'voice' || !ttsAvailable) return
+    if (outputMode !== 'voice') return
     const lastIdx = messages.length - 1
     if (lastIdx <= lastSpokenIndexRef.current) return
     const last = messages[lastIdx]
     if (!last || last.role !== 'assistant') { lastSpokenIndexRef.current = lastIdx; return }
     lastSpokenIndexRef.current = lastIdx
-    try {
-      window.speechSynthesis.cancel()
-      const u = new SpeechSynthesisUtterance(last.content)
-      u.lang = language === 'es' ? 'es-ES' : 'en-US'
-      u.rate = 1
-      u.pitch = 1
-      window.speechSynthesis.speak(u)
-    } catch { /* ignore */ }
-  }, [messages, outputMode, ttsAvailable, language])
 
+    let cancelled = false
+    ;(async () => {
+      try {
+        // Cancel any in-flight playback before starting the new one
+        if (ttsAudioRef.current) {
+          try { ttsAudioRef.current.pause() } catch { /* ignore */ }
+          ttsAudioRef.current = null
+        }
+        const res = await fetch(`/api/apply/${token}/tts`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: last.content }),
+        })
+        if (!res.ok) {
+          // Server not configured or upstream failed; degrade gracefully
+          if (res.status === 503) setError(t.tts_unavailable)
+          return
+        }
+        const blob = await res.blob()
+        if (cancelled) return
+        const url = URL.createObjectURL(blob)
+        const audio = new Audio(url)
+        ttsAudioRef.current = audio
+        audio.onended = () => { try { URL.revokeObjectURL(url) } catch { /* ignore */ } }
+        await audio.play().catch(() => {
+          /* Autoplay may be blocked until first user interaction;
+             ignore silently — message is still on screen. */
+        })
+      } catch {
+        /* ignore */
+      }
+    })()
+    return () => { cancelled = true }
+  }, [messages, outputMode, language, token, t.tts_unavailable])
+
+  // When the candidate switches OUT of voice mode, stop any current playback.
   useEffect(() => {
-    if (outputMode === 'text' && ttsAvailable) window.speechSynthesis.cancel()
-  }, [outputMode, ttsAvailable])
+    if (outputMode === 'text' && ttsAudioRef.current) {
+      try { ttsAudioRef.current.pause(); ttsAudioRef.current.src = '' } catch { /* ignore */ }
+      ttsAudioRef.current = null
+    }
+  }, [outputMode])
 
   async function getFirstMessage() {
     setIsTyping(true); setError('')
@@ -544,7 +582,7 @@ export default function InterviewChat({
                 voiceLabel={t.input_voice} textLabel={t.input_text}
                 disabled={isRecording || isTranscribing} />
               <ModeToggle label={t.ai_voice} value={outputMode}
-                onChange={(v) => { if (v === 'voice' && !ttsAvailable) { setError(t.tts_unsupported); return } setOutputMode(v) }}
+                onChange={(v) => setOutputMode(v)}
                 voiceLabel={t.input_voice} textLabel={t.input_text}
                 disabled={false} />
             </div>

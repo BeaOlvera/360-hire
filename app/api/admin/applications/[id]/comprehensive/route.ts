@@ -18,16 +18,28 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   const unauth = checkAdminAuth(request)
   if (unauth) return unauth
 
+  const url = new URL(request.url)
+  const refresh = url.searchParams.get('refresh') === '1'
+
   const { data: app, error } = await supabaseAdmin
     .from('applications')
     .select(`
       id, status, cv_text, score_data, completed_at, recommendation, fit_score, competencies_override,
+      comprehensive_html, comprehensive_generated_at,
       jobs ( title, description, org_level, language, competencies ),
       candidates ( first_name, surname1, surname2, preferred_language )
     `)
     .eq('id', params.id)
     .single()
   if (error || !app) return NextResponse.json({ error: 'Application not found' }, { status: 404 })
+
+  // Return the cached HTML if present and the caller didn't force a refresh.
+  // ~$0.20 per generation; cache means repeat views are free + instant.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const cachedHtml = (app as any).comprehensive_html as string | null
+  if (cachedHtml && !refresh) {
+    return new NextResponse(cachedHtml, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8', 'X-Cache': 'HIT' } })
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const job = app.jobs as any
@@ -98,13 +110,24 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     language,
   })
 
+  // Cache the HTML on the application row so repeat views are instant + free.
+  try {
+    await supabaseAdmin
+      .from('applications')
+      .update({ comprehensive_html: html, comprehensive_generated_at: new Date().toISOString() })
+      .eq('id', app.id)
+  } catch (err) {
+    // Cache write failure is non-fatal; the report still goes back to the user.
+    console.warn('Comprehensive cache write failed', err)
+  }
+
   logAudit({
     action: 'report.generated',
     actorType: 'admin',
     resourceType: 'application',
     resourceId: app.id,
-    details: { kind: 'comprehensive' },
+    details: { kind: 'comprehensive', refresh },
   })
 
-  return new NextResponse(html, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } })
+  return new NextResponse(html, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8', 'X-Cache': 'MISS' } })
 }

@@ -33,8 +33,8 @@ const I18N = {
         : `A conversational interview about your experience and fit for the ${jobTitle} role. Conducted by an AI interviewer. You can answer by voice or by typing.`,
     button: 'Start the first step',
     minute: 'min',
-    totalAbout: 'About',
-    totalMinutes: 'minutes total before the interview.',
+    totalLabel: 'Total estimated time',
+    totalRange: (lo: number, hi: number) => `${lo} to ${hi} minutes`,
   },
   es: {
     title: (firstName: string) => `Bienvenido/a, ${firstName}`,
@@ -53,8 +53,8 @@ const I18N = {
         : `Una entrevista conversacional sobre tu experiencia y encaje con el puesto de ${jobTitle}. Conducida por una IA. Puedes responder por voz o escribiendo.`,
     button: 'Empezar el primer paso',
     minute: 'min',
-    totalAbout: 'Unos',
-    totalMinutes: 'minutos en total antes de la entrevista.',
+    totalLabel: 'Tiempo total estimado',
+    totalRange: (lo: number, hi: number) => `${lo} a ${hi} minutos`,
   },
 } as const
 
@@ -63,12 +63,18 @@ const ASSESSMENT_NAMES_EN: Record<string, string> = {
   growth_orientation: 'Growth Orientation',
   career_values: 'Career Values',
   culture_fit: 'Culture Fit',
+  big_five: 'Big Five Personality',
+  icar_reasoning: 'Reasoning',
+  resilience: 'Resilience',
 }
 const ASSESSMENT_NAMES_ES: Record<string, string> = {
   thinking_style: 'Estilos de Pensamiento',
   growth_orientation: 'Orientación al Desarrollo',
   career_values: 'Valores Profesionales',
   culture_fit: 'Encaje Cultural',
+  big_five: 'Personalidad Big Five',
+  icar_reasoning: 'Razonamiento',
+  resilience: 'Resiliencia',
 }
 
 export default function Overview({ token, candidateFirstName, jobTitle, isGeneric, language, steps }: Props) {
@@ -92,9 +98,9 @@ export default function Overview({ token, candidateFirstName, jobTitle, isGeneri
     <div style={{ minHeight: '100vh', background: '#F5F4F0', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <div style={{ maxWidth: 680, width: '100%', background: '#FFFFFF', border: '1px solid #E2E0DA', borderRadius: 18, overflow: 'hidden' }}>
 
-        <div style={{ background: '#0F3D3E', color: '#FFFFFF', padding: '24px 30px' }}>
+        <div style={{ background: '#0A0A0A', color: '#FFFFFF', padding: '24px 30px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-            <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(255,255,255,0.16)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 9 }}>360</div>
+            <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(255,255,255,0.14)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 9 }}>360</div>
             <span style={{ fontSize: 14, fontWeight: 700 }}>360 Hire</span>
           </div>
           <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.4px', margin: 0 }}>{t.title(candidateFirstName)}</h1>
@@ -134,11 +140,10 @@ export default function Overview({ token, candidateFirstName, jobTitle, isGeneri
             <p style={{ fontSize: 11, color: '#6B6B6B', marginTop: 10, lineHeight: 1.5 }}>{t.interviewHint(jobTitle, isGeneric)}</p>
           </div>
 
-          {totalMinutes > 0 && (
-            <p style={{ fontSize: 12, color: '#6B6B6B', textAlign: 'center', marginBottom: 18 }}>
-              {t.totalAbout} <strong style={{ color: '#0A0A0A' }}>{totalMinutes} {t.minute}</strong> {t.totalMinutes}
-            </p>
-          )}
+          <div style={{ background: '#F5F4F0', border: '1px solid #E2E0DA', borderRadius: 10, padding: '12px 16px', marginBottom: 18, textAlign: 'center' }}>
+            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', color: '#6B6B6B', textTransform: 'uppercase', marginBottom: 4 }}>{t.totalLabel}</p>
+            <p style={{ fontSize: 16, fontWeight: 700, color: '#0A0A0A' }}>{t.totalRange(totalMinutes + 30, totalMinutes + 45)}</p>
+          </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <button onClick={handleStart} disabled={loading}

@@ -79,7 +79,14 @@ Rules:
 - Write in plain natural language. Never use em or en dashes ("—" / "–"); use commas, parentheses, colons, or separate sentences.
 - If a section has nothing to report, return an empty array rather than padding with fluff.
 - Be honest about uncertainty (use "unclear" rating, surface risk flags).
-- Output JSON only, no surrounding prose.`
+- Output JSON only, no surrounding prose.
+
+LEGAL & ETHICAL CONSTRAINTS (mandatory):
+- NEVER infer concerns from protected or personal characteristics that the candidate mentioned only in passing: family situation (children, marriage, pregnancy), age, gender, ethnicity, religion, disability, sexual orientation, country of origin, military status. A passing mention of "my daughter" or "my partner" is NEVER evidence of reduced availability, mobility, ambition, or commitment.
+- "cross_signal_observations" and "risk_flags" must be based on direct statements the candidate made about WORK behaviour, motivation, or capacity — not on inferences from personal disclosures.
+- BAD example (forbidden): "The spontaneous mention of having a daughter near the end of the interview, without further context, leaves unexplored the full travel availability the role requires."
+- GOOD example: "The candidate said directly 'I can travel up to 30% of the time' but the role requires 60%; this needs verification in the next round."
+- If you genuinely need to verify availability, ASK FOR IT as a "next_step" (e.g. "Confirm directly with the candidate how much they can travel"), do NOT infer it from a personal mention.`
 
 const SYSTEM_PROMPT_ES = `Eres una evaluadora senior de selección que produce un informe integrado de candidatura. Recibirás cinco fuentes de evidencia:
 1. DESCRIPCIÓN DEL PUESTO y COMPETENCIAS objetivo (con pesos: crítica, importante, relevante)
@@ -111,7 +118,14 @@ Reglas:
 - Lenguaje natural; nunca uses la raya ni el guion largo ("—" / "–"); usa comas, paréntesis, dos puntos o frases separadas.
 - Si una sección no tiene nada que reportar, devuelve un array vacío en lugar de rellenar.
 - Sé honesta con la incertidumbre (usa rating "unclear", saca a flote las banderas de riesgo).
-- Devuelve solo el JSON, sin texto adicional.`
+- Devuelve solo el JSON, sin texto adicional.
+
+RESTRICCIONES LEGALES Y ÉTICAS (obligatorias):
+- NUNCA infieras preocupaciones a partir de características personales o protegidas que la persona candidata mencionó solo de pasada: situación familiar (hijos/as, pareja, embarazo), edad, género, etnia, religión, discapacidad, orientación sexual, país de origen, servicio militar. Una mención casual de "mi hija" o "mi pareja" NUNCA es evidencia de menor disponibilidad, movilidad, ambición o compromiso.
+- "cross_signal_observations" y "risk_flags" deben basarse en declaraciones directas sobre comportamiento, motivación o capacidad LABORALES; no en inferencias a partir de revelaciones personales.
+- Ejemplo MAL (prohibido): "La mención espontánea de tener una hija al final de la entrevista, sin contexto adicional, queda sin explorar en relación con la disponibilidad total para viajar que el puesto exige."
+- Ejemplo BIEN: "La persona dijo directamente 'puedo viajar hasta un 30% del tiempo' pero el puesto requiere un 60%; conviene verificarlo en la siguiente ronda."
+- Si genuinamente necesitas verificar disponibilidad, PÍDELO como "next_step" (p.ej. "Confirmar directamente con la persona cuánto puede viajar"), NO lo infieras de una mención personal.`
 
 export async function synthesizeCandidate(args: {
   applicationId: string
