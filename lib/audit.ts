@@ -29,6 +29,7 @@ export type AuditAction =
   | 'application.invited'
   | 'application.reviewed'
   | 'application.recommendation_set'
+  | 'application.reset'
   // Candidate-facing
   | 'application.accessed'
   | 'interview.started'

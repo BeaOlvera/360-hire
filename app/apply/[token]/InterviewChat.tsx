@@ -33,6 +33,7 @@ const I18N = {
     voice_unconfigured: 'Voice input is not configured on this server. Please use text.',
     tts_unsupported: 'Voice output is not available in this browser.',
     tts_unavailable: 'Voice output is not configured on this server. Please use text.',
+    tts_enable: 'Tap to enable voice',
     transcribe_failed: 'Could not transcribe. Try again or switch to text.',
     placeholder_text: 'Type your response... (Enter to send, Shift+Enter for new line)',
     placeholder_waiting: 'Waiting for interviewer...',
@@ -59,6 +60,7 @@ const I18N = {
     voice_unconfigured: 'La entrada por voz no está configurada en este servidor. Por favor usa texto.',
     tts_unsupported: 'La salida por voz no está disponible en este navegador.',
     tts_unavailable: 'La voz no está configurada en este servidor. Por favor usa texto.',
+    tts_enable: 'Toca para activar la voz',
     transcribe_failed: 'No se pudo transcribir. Inténtalo de nuevo o cambia a texto.',
     placeholder_text: 'Escribe tu respuesta... (Enter para enviar, Shift+Enter para nueva línea)',
     placeholder_waiting: 'Esperando al entrevistador...',
@@ -98,6 +100,8 @@ export default function InterviewChat({
   const recordTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const lastSpokenIndexRef = useRef<number>(-1)
   const ttsAudioRef = useRef<HTMLAudioElement | null>(null)
+  const pendingTtsUrlRef = useRef<string | null>(null)
+  const [ttsBlocked, setTtsBlocked] = useState(false)
   // TTS is now server-side (OpenAI tts-1). Always available unless the route
   // returns 503 (server has no OPENAI_API_KEY) — handled lazily on first use.
   const ttsAvailable = true
@@ -201,12 +205,36 @@ export default function InterviewChat({
         return
       }
       try {
+        // Honour the camera/mic the candidate picked in the preflight screen.
+        // localStorage preflight-<token>: { camId?, micId?, skip?: true }
+        let chosenCamId: string | null = null
+        let chosenMicId: string | null = null
+        let skipped = false
+        try {
+          const raw = localStorage.getItem(`preflight-${token}`)
+          if (raw) {
+            const obj = JSON.parse(raw)
+            if (obj?.skip === true) skipped = true
+            if (typeof obj?.camId === 'string') chosenCamId = obj.camId
+            if (typeof obj?.micId === 'string') chosenMicId = obj.micId
+          }
+        } catch { /* ignore */ }
+
+        if (skipped) {
+          // Candidate opted out of video; do nothing. Interview continues without recording.
+          return
+        }
+
         // Modest resolution + bitrate so the cumulative file stays within the 50 MB
         // Supabase Storage limit for typical 30-45 min interviews (~300 kbps * 45 min ~= 100 MB).
-        // Even tighter ~250 kbps to give headroom; quality is acceptable for review.
+        const videoConstraints: MediaTrackConstraints = {
+          width: { ideal: 480 }, height: { ideal: 360 }, frameRate: { ideal: 12, max: 15 },
+        }
+        if (chosenCamId) videoConstraints.deviceId = { exact: chosenCamId }
+        const audioConstraints: MediaTrackConstraints | boolean = chosenMicId ? { deviceId: { exact: chosenMicId } } : true
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { width: { ideal: 480 }, height: { ideal: 360 }, frameRate: { ideal: 12, max: 15 } },
-          audio: true,
+          video: videoConstraints,
+          audio: audioConstraints,
         })
         if (cancelled) { stream.getTracks().forEach((tr) => tr.stop()); return }
         videoStreamRef.current = stream
@@ -294,10 +322,16 @@ export default function InterviewChat({
         const audio = new Audio(url)
         ttsAudioRef.current = audio
         audio.onended = () => { try { URL.revokeObjectURL(url) } catch { /* ignore */ } }
-        await audio.play().catch(() => {
-          /* Autoplay may be blocked until first user interaction;
-             ignore silently — message is still on screen. */
-        })
+        try {
+          await audio.play()
+          setTtsBlocked(false)
+        } catch (playErr) {
+          // Browsers block autoplay until first user gesture. Surface a
+          // play button so the candidate can manually enable the voice.
+          console.warn('TTS autoplay blocked', playErr)
+          pendingTtsUrlRef.current = url
+          setTtsBlocked(true)
+        }
       } catch {
         /* ignore */
       }
@@ -405,13 +439,16 @@ export default function InterviewChat({
           const form = new FormData()
           form.append('audio', blob, 'clip.webm')
           const res = await fetch(`/api/apply/${token}/transcribe`, { method: 'POST', body: form })
-          const data = await res.json()
+          const data = await res.json().catch(() => ({}))
           if (!res.ok || !data.text) {
-            setError(t.transcribe_failed)
+            // Surface the real reason so the candidate can act on it
+            const detail = (data && (data.error || data.detail)) ? `${t.transcribe_failed} (${data.error}${data.detail ? `: ${data.detail}` : ''})` : t.transcribe_failed
+            setError(detail)
           } else {
             await sendTranscribedText(data.text)
           }
-        } catch {
+        } catch (err) {
+          console.warn('Transcribe network error', err)
           setError(t.transcribe_failed)
         } finally {
           setIsTranscribing(false)
@@ -437,14 +474,22 @@ export default function InterviewChat({
 
   const canType = !isTyping && !isTranscribing && !isRecording && messages.length > 0 && !isComplete
 
-  // Keep cursor in the textarea after the interviewer replies. Without this the
-  // candidate has to click back into the input every turn (reported by the
-  // partner test, 2026-06-01).
+  // Keep cursor in the textarea after the interviewer replies AND whenever a
+  // new message arrives. Defer to next paint so the textarea is rendered as
+  // enabled at the moment we call focus(). Belt-and-suspenders: also focus
+  // when the messages array changes (some browsers drop focus during diffing).
   useEffect(() => {
-    if (canType && inputMode === 'text' && inputRef.current) {
-      inputRef.current.focus()
-    }
-  }, [canType, inputMode])
+    if (!canType || inputMode !== 'text') return
+    const el = inputRef.current
+    if (!el) return
+    const id = requestAnimationFrame(() => {
+      el.focus()
+      // Place caret at the end (some browsers move it to the start on programmatic focus)
+      const v = el.value
+      el.setSelectionRange(v.length, v.length)
+    })
+    return () => cancelAnimationFrame(id)
+  }, [canType, inputMode, messages.length])
 
   return (
     <div style={{ minHeight: '100vh', background: '#F5F4F0', display: 'flex', flexDirection: 'column' }}>
@@ -553,6 +598,25 @@ export default function InterviewChat({
             </div>
           )}
 
+          {ttsBlocked && outputMode === 'voice' && !isComplete && (
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <button type="button"
+                onClick={async () => {
+                  const audio = ttsAudioRef.current
+                  if (!audio) { setTtsBlocked(false); return }
+                  try {
+                    await audio.play()
+                    setTtsBlocked(false)
+                  } catch (err) {
+                    console.warn('Manual TTS play failed', err)
+                  }
+                }}
+                style={{ background: '#0A0A0A', color: '#FFFFFF', border: 'none', borderRadius: 999, padding: '8px 18px', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 14 }}>🔊</span> {t.tts_enable}
+              </button>
+            </div>
+          )}
+
           {error && (
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               <div style={{ background: '#FBEAEC', border: '1px solid #F5C5CB', borderRadius: 12, padding: '12px 18px' }}>
@@ -590,7 +654,7 @@ export default function InterviewChat({
               <form onSubmit={sendMessage} style={{ display: 'flex', alignItems: 'flex-end', gap: 10 }}>
                 <textarea
                   ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={handleKeyDown}
-                  disabled={!canType} rows={1}
+                  disabled={!canType} rows={1} autoFocus
                   placeholder={messages.length === 0 ? t.placeholder_waiting : t.placeholder_text}
                   style={{
                     flex: 1, resize: 'none', padding: '10px 14px', border: '1px solid #E2E0DA',

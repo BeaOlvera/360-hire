@@ -7,6 +7,30 @@ export default function CandidateLinkCard({ applicationId, token, candidateEmail
   const [resending, setResending] = useState(false)
   const [resendMsg, setResendMsg] = useState('')
   const [resendErr, setResendErr] = useState('')
+  const [resetting, setResetting] = useState(false)
+  const [resetMsg, setResetMsg] = useState('')
+
+  async function handleReset(wipeCv: boolean) {
+    const confirmMsg = wipeCv
+      ? 'Reset this interview AND delete the uploaded CV? The candidate will start from the privacy gate again. This cannot be undone.'
+      : 'Reset this interview? The candidate will start from the privacy gate again (the CV is kept). This cannot be undone.'
+    if (!window.confirm(confirmMsg)) return
+    setResetting(true); setResetMsg(''); setResendMsg(''); setResendErr('')
+    try {
+      const res = await fetch(`/api/admin/applications/${applicationId}/reset`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ wipe_cv: wipeCv }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) { setResendErr(data.error ?? 'Reset failed'); return }
+      setResetMsg(wipeCv ? 'Interview and CV wiped. Same invite link is now ready for a fresh run.' : 'Interview wiped. Same invite link is now ready for a fresh run.')
+      setTimeout(() => window.location.reload(), 1200)
+    } catch {
+      setResendErr('Network error. Please try again.')
+    } finally {
+      setResetting(false)
+    }
+  }
 
   const url = typeof window !== 'undefined' ? `${window.location.origin}/apply/${token}` : `/apply/${token}`
 
@@ -52,13 +76,34 @@ export default function CandidateLinkCard({ applicationId, token, candidateEmail
           {resending ? 'Resending…' : 'Resend email'}
         </button>
       </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 12, paddingTop: 12, borderTop: '1px dashed #E2E0DA', flexWrap: 'wrap' }}>
+        <span style={{ fontSize: 11, color: '#6B6B6B', flex: 1, minWidth: 200 }}>
+          Need to start over? Wipe the in-progress interview and the same link will resume from the beginning.
+        </span>
+        <button onClick={() => handleReset(false)} disabled={resetting}
+          style={{ background: '#FFFFFF', color: '#9B2335', border: '1px solid #F5C5CB', borderRadius: 10, padding: '8px 14px', fontSize: 11, fontWeight: 600, cursor: resetting ? 'not-allowed' : 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', opacity: resetting ? 0.6 : 1 }}>
+          {resetting ? 'Resetting…' : 'Reset interview (keep CV)'}
+        </button>
+        <button onClick={() => handleReset(true)} disabled={resetting}
+          title="Also delete the uploaded CV"
+          style={{ background: '#9B2335', color: '#FFFFFF', border: 'none', borderRadius: 10, padding: '8px 14px', fontSize: 11, fontWeight: 600, cursor: resetting ? 'not-allowed' : 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', opacity: resetting ? 0.6 : 1 }}>
+          Reset + delete CV
+        </button>
+      </div>
+
       {resendMsg && (
-        <div style={{ background: '#EAEAEA', border: '1px solid #D5D3CE', borderRadius: 10, padding: '8px 12px' }}>
+        <div style={{ background: '#EAEAEA', border: '1px solid #D5D3CE', borderRadius: 10, padding: '8px 12px', marginTop: 10 }}>
           <p style={{ fontSize: 12, color: '#3F3F3F', fontWeight: 600 }}>{resendMsg}</p>
         </div>
       )}
+      {resetMsg && (
+        <div style={{ background: '#EAEAEA', border: '1px solid #D5D3CE', borderRadius: 10, padding: '8px 12px', marginTop: 10 }}>
+          <p style={{ fontSize: 12, color: '#3F3F3F', fontWeight: 600 }}>{resetMsg}</p>
+        </div>
+      )}
       {resendErr && (
-        <div style={{ background: '#FBEAEC', border: '1px solid #F5C5CB', borderRadius: 10, padding: '8px 12px' }}>
+        <div style={{ background: '#FBEAEC', border: '1px solid #F5C5CB', borderRadius: 10, padding: '8px 12px', marginTop: 10 }}>
           <p style={{ fontSize: 12, color: '#9B2335' }}>{resendErr}</p>
         </div>
       )}

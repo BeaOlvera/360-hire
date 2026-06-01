@@ -1,6 +1,6 @@
 import { supabaseAdmin } from '@/lib/supabase'
 import { notFound, redirect } from 'next/navigation'
-import InterviewChat from './InterviewChat'
+import InterviewGateway from './InterviewGateway'
 import PrivacyGate from './PrivacyGate'
 import CVUpload from './CVUpload'
 import Assessment from './Assessment'
@@ -167,7 +167,7 @@ export default async function ApplyPage({ params }: { params: { token: string } 
   }
 
   return (
-    <InterviewChat
+    <InterviewGateway
       token={params.token}
       candidateFirstName={ctx.candidateFirstName}
       candidateFullName={ctx.candidateFullName}
