@@ -145,7 +145,7 @@ export default async function ApplicationReviewPage({ params }: { params: { id: 
                 <video src={`${app.video_url}?t=${Date.now()}`} controls preload="metadata"
                   style={{ width: '100%', borderRadius: 12, background: '#000', display: 'block' }} />
                 <p style={{ fontSize: 11, color: '#AEABA3', marginTop: 8 }}>
-                  <a href={app.video_url} target="_blank" rel="noopener noreferrer" style={{ color: '#0F3D3E' }}>Open in new tab</a>
+                  <a href={app.video_url} target="_blank" rel="noopener noreferrer" style={{ color: '#0A0A0A' }}>Open in new tab</a>
                   {app.status !== 'completed' && app.status !== 'reviewed' && app.status !== 'hired' && app.status !== 'rejected' && (
                     <span> · auto-saves every 60 seconds while the candidate is in the interview</span>
                   )}
@@ -199,7 +199,7 @@ export default async function ApplicationReviewPage({ params }: { params: { id: 
               <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.15em', color: '#AEABA3', textTransform: 'uppercase', marginBottom: 12 }}>CV</p>
               {app.cv_url ? (
                 <a href={app.cv_url} target="_blank" rel="noopener noreferrer"
-                  style={{ background: '#0F3D3E', color: '#FFFFFF', textDecoration: 'none', padding: '8px 16px', borderRadius: 10, fontSize: 13, fontWeight: 600, display: 'inline-block' }}>
+                  style={{ background: '#0A0A0A', color: '#FFFFFF', textDecoration: 'none', padding: '8px 16px', borderRadius: 10, fontSize: 13, fontWeight: 600, display: 'inline-block' }}>
                   Open CV
                 </a>
               ) : (
@@ -239,7 +239,7 @@ export default async function ApplicationReviewPage({ params }: { params: { id: 
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 }}>
                             <span style={{ fontSize: 11, color: '#6B6B6B' }}>{summarizeScores(code as AssessmentCode, row.scores)}</span>
                             <a href={`/api/admin/applications/${app.id}/assessment/${code}`} target="_blank" rel="noopener noreferrer"
-                              style={{ fontSize: 11, color: '#0F3D3E', fontWeight: 600, textDecoration: 'underline' }}>
+                              style={{ fontSize: 11, color: '#0A0A0A', fontWeight: 600, textDecoration: 'underline' }}>
                               Open report
                             </a>
                           </div>

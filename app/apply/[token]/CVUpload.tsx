@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import Logo from '@/components/Logo'
 
 const TEXTS = {
   en: {
@@ -98,12 +99,10 @@ export default function CVUpload({
   return (
     <div style={{ minHeight: '100vh', background: '#F5F4F0', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <div style={{ maxWidth: 600, width: '100%', background: '#FFFFFF', borderRadius: 18, border: '1px solid #E2E0DA', padding: '28px 32px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 8, background: '#0F3D3E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ color: '#FFFFFF', fontWeight: 800, fontSize: 9 }}>360</span>
-          </div>
-          <span style={{ fontWeight: 700, fontSize: 15, color: '#0A0A0A' }}>{t.title}</span>
+        <div style={{ marginBottom: 14 }}>
+          <Logo variant="dark" height={20} />
         </div>
+        <h1 style={{ fontWeight: 700, fontSize: 18, color: '#0A0A0A', margin: '0 0 14px', letterSpacing: '-0.3px' }}>{t.title}</h1>
 
         <p style={{ fontSize: 13, color: '#6B6B6B', lineHeight: 1.6, marginBottom: 18 }}>
           {t.intro(jobTitle)}
@@ -114,7 +113,7 @@ export default function CVUpload({
           onDragLeave={() => setDragging(false)}
           onDrop={(e) => { e.preventDefault(); setDragging(false); handleFile(e.dataTransfer.files?.[0] ?? null) }}
           style={{
-            border: '2px dashed', borderColor: dragging ? '#0F3D3E' : '#E2E0DA',
+            border: '2px dashed', borderColor: dragging ? '#0A0A0A' : '#E2E0DA',
             borderRadius: 14, padding: '32px 24px', textAlign: 'center',
             background: dragging ? '#EAF4EF' : '#F5F4F0', marginBottom: 14,
             transition: 'background 0.15s, border-color 0.15s',
@@ -132,7 +131,7 @@ export default function CVUpload({
           ) : (
             <>
               <button type="button" onClick={() => inputRef.current?.click()}
-                style={{ background: '#0F3D3E', color: '#FFFFFF', border: 'none', borderRadius: 10, padding: '9px 20px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', marginBottom: 8 }}>
+                style={{ background: '#0A0A0A', color: '#FFFFFF', border: 'none', borderRadius: 10, padding: '9px 20px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', marginBottom: 8 }}>
                 {t.pick}
               </button>
               <p style={{ fontSize: 12, color: '#6B6B6B' }}>{t.drag}</p>
@@ -163,7 +162,7 @@ export default function CVUpload({
           ) : <span />}
           <button onClick={handleSubmit} disabled={!file || loading || skipping}
             style={{
-              background: !file || loading || skipping ? '#AEABA3' : '#0F3D3E', color: '#FFFFFF', border: 'none',
+              background: !file || loading || skipping ? '#AEABA3' : '#0A0A0A', color: '#FFFFFF', border: 'none',
               borderRadius: 10, padding: '10px 22px', fontSize: 13, fontWeight: 600,
               cursor: !file || loading || skipping ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
             }}>

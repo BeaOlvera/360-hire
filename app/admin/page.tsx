@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
+import Logo from '@/components/Logo'
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -35,11 +36,8 @@ export default function AdminLoginPage() {
     <div style={{ minHeight: '100vh', background: '#F5F4F0', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 32 }}>
       <div style={{ width: '100%', maxWidth: 420 }}>
         <div style={{ background: '#FFFFFF', border: '1px solid #E2E0DA', borderRadius: 20, padding: '36px 40px 32px', marginBottom: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
-            <div style={{ width: 34, height: 34, borderRadius: 10, background: '#0F3D3E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ color: '#FFFFFF', fontWeight: 800, fontSize: 11 }}>360</span>
-            </div>
-            <span style={{ fontWeight: 700, fontSize: 19, color: '#0A0A0A', letterSpacing: '-0.5px' }}>Hire</span>
+          <div style={{ marginBottom: 24 }}>
+            <Logo variant="dark" height={28} />
           </div>
 
           <h1 style={{ fontSize: 22, fontWeight: 700, color: '#0A0A0A', letterSpacing: '-0.5px', marginBottom: 6 }}>
@@ -91,7 +89,7 @@ export default function AdminLoginPage() {
         </div>
 
         <p style={{ fontSize: 11, color: '#AEABA3', textAlign: 'center', marginTop: 12 }}>
-          360 Hire · Candidate Assessment Platform
+          Zephyron Hire · Candidate Assessment Platform
         </p>
       </div>
     </div>

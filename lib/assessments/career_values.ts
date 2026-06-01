@@ -188,7 +188,7 @@ function generateHtml(args: {
   * { box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #F5F4F0; color: #0A0A0A; margin: 0; padding: 32px 16px; }
   .page { max-width: 820px; margin: 0 auto; background: #FFFFFF; border: 1px solid #E2E0DA; border-radius: 18px; overflow: hidden; }
-  header { background: #0F3D3E; color: #FFFFFF; padding: 28px 36px; }
+  header { background: #0A0A0A; color: #FFFFFF; padding: 28px 36px; }
   header .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
   header .badge { width: 28px; height: 28px; border-radius: 8px; background: rgba(255,255,255,0.16); display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 9px; }
   header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.4px; margin: 0; }
@@ -209,7 +209,7 @@ function generateHtml(args: {
 <body>
 <div class="page">
   <header>
-    <div class="logo"><span class="badge">360</span><span style="font-size:14px; font-weight:700;">360 Hire</span></div>
+    <div class="logo"><svg viewBox="0 0 200 50" height="24" style="display:block;height:24px;width:auto"><text x="0" y="34" font-family="-apple-system, Segoe UI, Roboto, sans-serif" font-weight="800" font-size="26" letter-spacing="-0.6" fill="#FFFFFF">Zephyron</text><line x1="124" y1="11" x2="124" y2="39" stroke="#6B6B6B" stroke-width="1" /><text x="132" y="34" font-family="-apple-system, Segoe UI, Roboto, sans-serif" font-weight="400" font-size="26" letter-spacing="-0.2" fill="#AEABA3">Hire</text></svg></div>
     <h1>${escape(t.title)}</h1>
     <p>${escape(t.subtitle)}</p>
   </header>
@@ -234,7 +234,7 @@ function generateHtml(args: {
 
     <div class="methods">${escape(t.methodNote)}</div>
   </main>
-  <footer>360 Hire</footer>
+  <footer>Zephyron Hire</footer>
 </div>
 </body>
 </html>`

@@ -63,7 +63,7 @@ const STATUS_STYLES: Record<string, { bg: string; color: string; label: string }
   in_progress: { bg: '#FEF3E2', color: '#B7791F', label: 'In progress' },
   completed:   { bg: '#EAF4EF', color: '#2D6A4F', label: 'Completed' },
   reviewed:    { bg: '#E8E4F3', color: '#4C3A8C', label: 'Reviewed' },
-  hired:       { bg: '#DCEEEA', color: '#0F3D3E', label: 'Hired' },
+  hired:       { bg: '#DCEEEA', color: '#0A0A0A', label: 'Hired' },
   rejected:    { bg: '#FBEAEC', color: '#9B2335', label: 'Rejected' },
 }
 

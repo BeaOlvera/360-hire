@@ -5,7 +5,7 @@ const REC_LABELS = {
   es: { strong_hire: 'Contratacion firme', hire: 'Contratar', maybe: 'Tal vez', no_hire: 'No contratar' },
 }
 const REC_COLORS = {
-  strong_hire: { bg: '#DCEEEA', color: '#0F3D3E' },
+  strong_hire: { bg: '#DCEEEA', color: '#0A0A0A' },
   hire:        { bg: '#EAF4EF', color: '#2D6A4F' },
   maybe:       { bg: '#FEF3E2', color: '#B7791F' },
   no_hire:     { bg: '#FBEAEC', color: '#9B2335' },
@@ -76,7 +76,7 @@ export function generateReportHTML(args: {
   * { box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #F5F4F0; color: #0A0A0A; margin: 0; padding: 32px 16px; }
   .page { max-width: 820px; margin: 0 auto; background: #FFFFFF; border: 1px solid #E2E0DA; border-radius: 18px; overflow: hidden; }
-  header { background: #0F3D3E; color: #FFFFFF; padding: 28px 36px; }
+  header { background: #0A0A0A; color: #FFFFFF; padding: 28px 36px; }
   header .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
   header .logo .badge { width: 28px; height: 28px; border-radius: 8px; background: rgba(255,255,255,0.16); display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 9px; }
   header h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.4px; margin: 0; }
@@ -90,7 +90,7 @@ export function generateReportHTML(args: {
   .card .small { font-size: 10px; font-weight: 700; letter-spacing: 0.15em; color: #AEABA3; text-transform: uppercase; margin-bottom: 8px; }
   .fit-num { font-size: 40px; font-weight: 800; color: #0A0A0A; letter-spacing: -1px; }
   .fit-bar { height: 6px; background: #E2E0DA; border-radius: 99px; overflow: hidden; margin-top: 10px; }
-  .fit-bar > div { height: 100%; background: #0F3D3E; border-radius: 99px; }
+  .fit-bar > div { height: 100%; background: #0A0A0A; border-radius: 99px; }
   .rec-pill { display: inline-block; padding: 6px 14px; border-radius: 99px; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; background: ${recColor.bg}; color: ${recColor.color}; text-transform: uppercase; }
   section { margin-bottom: 28px; }
   section h2 { font-size: 13px; font-weight: 700; letter-spacing: 0.12em; color: #AEABA3; text-transform: uppercase; margin: 0 0 12px; }
@@ -100,7 +100,7 @@ export function generateReportHTML(args: {
   .comp-head .name { font-size: 14px; font-weight: 700; color: #0A0A0A; }
   .comp-head .meta-row { font-size: 11px; color: #6B6B6B; }
   .comp-score-bar { height: 6px; background: #F0EEE8; border-radius: 99px; overflow: hidden; margin-top: 6px; margin-bottom: 12px; }
-  .comp-score-bar > div { height: 100%; background: #0F3D3E; border-radius: 99px; }
+  .comp-score-bar > div { height: 100%; background: #0A0A0A; border-radius: 99px; }
   .comp ul { margin: 6px 0 0; padding-left: 18px; }
   .comp ul li { font-size: 12.5px; color: #0A0A0A; line-height: 1.55; margin-bottom: 4px; }
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 8px; }
@@ -114,7 +114,7 @@ export function generateReportHTML(args: {
 <body>
 <div class="page">
   <header>
-    <div class="logo"><span class="badge">360</span><span style="font-size: 14px; font-weight: 700;">360 Hire</span></div>
+    <div class="logo"><svg viewBox="0 0 200 50" height="24" style="display:block;height:24px;width:auto"><text x="0" y="34" font-family="-apple-system, Segoe UI, Roboto, sans-serif" font-weight="800" font-size="26" letter-spacing="-0.6" fill="#FFFFFF">Zephyron</text><line x1="124" y1="11" x2="124" y2="39" stroke="#6B6B6B" stroke-width="1" /><text x="132" y="34" font-family="-apple-system, Segoe UI, Roboto, sans-serif" font-weight="400" font-size="26" letter-spacing="-0.2" fill="#AEABA3">Hire</text></svg></div>
     <h1>${escape(t.title)}</h1>
     <p>${escape(jobTitle)}</p>
   </header>
@@ -182,7 +182,7 @@ export function generateReportHTML(args: {
       <ul class="plain">${(result.next_steps.length ? result.next_steps : ['-']).map((n) => `<li>${escape(n)}</li>`).join('')}</ul>
     </section>
   </main>
-  <footer>360 Hire</footer>
+  <footer>Zephyron Hire</footer>
 </div>
 </body>
 </html>`

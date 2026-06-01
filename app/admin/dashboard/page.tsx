@@ -57,7 +57,7 @@ export default async function DashboardPage() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 22 }}>
           <h1 style={{ fontSize: 22, fontWeight: 700, color: '#0A0A0A', letterSpacing: '-0.4px' }}>Jobs</h1>
           <Link href="/admin/jobs/new" style={{
-            background: '#0F3D3E', color: '#FFFFFF', textDecoration: 'none',
+            background: '#0A0A0A', color: '#FFFFFF', textDecoration: 'none',
             padding: '9px 18px', borderRadius: 10, fontSize: 13, fontWeight: 600,
           }}>
             + New job
@@ -68,7 +68,7 @@ export default async function DashboardPage() {
           <div style={{ background: '#FFFFFF', border: '1px solid #E2E0DA', borderRadius: 20, padding: '48px 32px', textAlign: 'center' }}>
             <p style={{ fontSize: 14, color: '#6B6B6B', marginBottom: 16 }}>No jobs yet. Create your first one to start inviting candidates.</p>
             <Link href="/admin/jobs/new" style={{
-              background: '#0F3D3E', color: '#FFFFFF', textDecoration: 'none',
+              background: '#0A0A0A', color: '#FFFFFF', textDecoration: 'none',
               padding: '10px 20px', borderRadius: 10, fontSize: 13, fontWeight: 600,
             }}>
               Create job

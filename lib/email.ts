@@ -1,4 +1,5 @@
 import { Resend } from 'resend'
+import { logoSvgHtml } from '@/components/Logo'
 
 export async function sendCandidateInvite(
   to: string,
@@ -34,6 +35,7 @@ function bodyJobEn(name: string, jobTitle: string, company: string | null, url: 
   const company_line = company ? ` at ${company}` : ''
   return `
   <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; color: #0A0A0A;">
+    <div style="padding: 0 0 18px; border-bottom: 1px solid #E2E0DA; margin-bottom: 22px;">${logoSvgHtml('dark', 24)}</div>
     <p>Hello ${name},</p>
     <p>Thank you for your interest in the <strong>${jobTitle}</strong> role${company_line}. As part of the selection process, we'd like you to complete a short conversational interview with our AI interviewer.</p>
     <p>The interview takes about 30 to 45 minutes. You can speak or type your answers, the choice is yours. The session is recorded so the hiring team can review it later, and your responses are used only for this assessment.</p>
@@ -50,6 +52,7 @@ function bodyJobEs(name: string, jobTitle: string, company: string | null, url: 
   const company_line = company ? ` en ${company}` : ''
   return `
   <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; color: #0A0A0A;">
+    <div style="padding: 0 0 18px; border-bottom: 1px solid #E2E0DA; margin-bottom: 22px;">${logoSvgHtml('dark', 24)}</div>
     <p>Hola ${name},</p>
     <p>Gracias por tu interés en el puesto de <strong>${jobTitle}</strong>${company_line}. Como parte del proceso de selección, nos gustaría que completaras una entrevista conversacional con nuestra entrevistadora de IA.</p>
     <p>La entrevista dura aproximadamente entre 30 y 45 minutos. Puedes responder hablando o escribiendo, tú eliges. La sesión se graba para que el equipo de selección pueda revisarla más tarde, y tus respuestas se usan únicamente para esta evaluación.</p>
@@ -65,6 +68,7 @@ function bodyJobEs(name: string, jobTitle: string, company: string | null, url: 
 function bodyGenericEn(name: string, url: string) {
   return `
   <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; color: #0A0A0A;">
+    <div style="padding: 0 0 18px; border-bottom: 1px solid #E2E0DA; margin-bottom: 22px;">${logoSvgHtml('dark', 24)}</div>
     <p>Hello ${name},</p>
     <p>You have been invited to complete a <strong>professional assessment</strong>. This is not tied to a specific role; rather, it is a structured way for us to learn about your strengths, working style and motivations so we can match you to projects and opportunities where you would do your best work.</p>
     <p>The assessment includes a short set of questionnaires followed by a conversational interview with our AI interviewer, about 30 to 45 minutes in total. You can speak or type your answers, the choice is yours.</p>
@@ -80,6 +84,7 @@ function bodyGenericEn(name: string, url: string) {
 function bodyGenericEs(name: string, url: string) {
   return `
   <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; color: #0A0A0A;">
+    <div style="padding: 0 0 18px; border-bottom: 1px solid #E2E0DA; margin-bottom: 22px;">${logoSvgHtml('dark', 24)}</div>
     <p>Hola ${name},</p>
     <p>Te invitamos a completar una <strong>evaluación profesional</strong>. No está vinculada a un puesto concreto; es una forma estructurada de conocer tus fortalezas, tu estilo de trabajo y tus motivaciones, para poder proponerte proyectos y oportunidades donde puedas dar lo mejor de ti.</p>
     <p>La evaluación incluye una serie breve de cuestionarios seguida de una entrevista conversacional con nuestra entrevistadora de IA, en total unos 30 a 45 minutos. Puedes responder hablando o escribiendo, tú eliges.</p>

@@ -61,7 +61,7 @@ export default function NewCandidateForm() {
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
         <button type="button" onClick={() => router.push('/admin/candidates')} style={{ background: '#FFFFFF', color: '#0A0A0A', border: '1px solid #E2E0DA', borderRadius: 10, padding: '10px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
-        <button type="submit" disabled={loading} style={{ background: loading ? '#AEABA3' : '#0F3D3E', color: '#FFFFFF', border: 'none', borderRadius: 10, padding: '10px 22px', fontSize: 13, fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}>
+        <button type="submit" disabled={loading} style={{ background: loading ? '#AEABA3' : '#0A0A0A', color: '#FFFFFF', border: 'none', borderRadius: 10, padding: '10px 22px', fontSize: 13, fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}>
           {loading ? 'Creating...' : 'Create candidate'}
         </button>
       </div>

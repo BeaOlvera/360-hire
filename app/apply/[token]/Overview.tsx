@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Logo from '@/components/Logo'
 
 type Step = { code: string; name: string; minutes: number }
 
@@ -99,9 +100,8 @@ export default function Overview({ token, candidateFirstName, jobTitle, isGeneri
       <div style={{ maxWidth: 680, width: '100%', background: '#FFFFFF', border: '1px solid #E2E0DA', borderRadius: 18, overflow: 'hidden' }}>
 
         <div style={{ background: '#0A0A0A', color: '#FFFFFF', padding: '24px 30px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-            <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(255,255,255,0.14)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 9 }}>360</div>
-            <span style={{ fontSize: 14, fontWeight: 700 }}>360 Hire</span>
+          <div style={{ marginBottom: 14 }}>
+            <Logo variant="light" height={22} />
           </div>
           <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.4px', margin: 0 }}>{t.title(candidateFirstName)}</h1>
           <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.85)', margin: '6px 0 0', lineHeight: 1.5 }}>{t.headline(jobTitle, isGeneric)}</p>

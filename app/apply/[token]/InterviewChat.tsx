@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
+import Logo from '@/components/Logo'
 
 type Message = { role: 'assistant' | 'user'; content: string }
 type IOMode = 'voice' | 'text'
@@ -450,11 +451,9 @@ export default function InterviewChat({
 
       <header style={{ background: '#FFFFFF', borderBottom: '1px solid #E2E0DA', flexShrink: 0 }}>
         <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 24px', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ width: 28, height: 28, borderRadius: 8, background: '#0F3D3E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ color: '#FFFFFF', fontWeight: 800, fontSize: 9 }}>360</span>
-            </div>
-            <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <Logo variant="dark" height={20} />
+            <div style={{ borderLeft: '1px solid #E2E0DA', paddingLeft: 14 }}>
               <p style={{ fontSize: 13, fontWeight: 700, color: '#0A0A0A', letterSpacing: '-0.3px' }}>{t.header(jobTitle)}</p>
               <p style={{ fontSize: 11, color: '#AEABA3' }}>{t.subheader}</p>
             </div>
@@ -497,7 +496,7 @@ export default function InterviewChat({
           {messages.map((msg, i) => (
             <div key={i} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start', alignItems: 'flex-start', gap: 10 }}>
               {msg.role === 'assistant' && (
-                <div style={{ width: 30, height: 30, borderRadius: 10, background: '#0F3D3E', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
+                <div style={{ width: 30, height: 30, borderRadius: 10, background: '#0A0A0A', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
                   <span style={{ color: '#FFFFFF', fontSize: 9, fontWeight: 800 }}>AI</span>
                 </div>
               )}
@@ -505,7 +504,7 @@ export default function InterviewChat({
                 maxWidth: '78%', padding: '12px 16px', borderRadius: 16, fontSize: 13, lineHeight: 1.6,
                 ...(msg.role === 'assistant'
                   ? { background: '#FFFFFF', border: '1px solid #E2E0DA', color: '#0A0A0A', borderTopLeftRadius: 4 }
-                  : { background: '#0F3D3E', color: '#FFFFFF', borderTopRightRadius: 4 }),
+                  : { background: '#0A0A0A', color: '#FFFFFF', borderTopRightRadius: 4 }),
               }}>
                 {msg.content}
               </div>
@@ -514,7 +513,7 @@ export default function InterviewChat({
 
           {isTyping && (
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-              <div style={{ width: 30, height: 30, borderRadius: 10, background: '#0F3D3E', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
+              <div style={{ width: 30, height: 30, borderRadius: 10, background: '#0A0A0A', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
                 <span style={{ color: '#FFFFFF', fontSize: 9, fontWeight: 800 }}>AI</span>
               </div>
               <div style={{ background: '#FFFFFF', border: '1px solid #E2E0DA', borderRadius: 16, borderTopLeftRadius: 4, padding: '14px 16px' }}>
@@ -601,7 +600,7 @@ export default function InterviewChat({
                   }} />
                 <button type="submit" disabled={!input.trim() || !canType}
                   style={{
-                    width: 42, height: 42, borderRadius: 12, background: !input.trim() || !canType ? '#E2E0DA' : '#0F3D3E',
+                    width: 42, height: 42, borderRadius: 12, background: !input.trim() || !canType ? '#E2E0DA' : '#0A0A0A',
                     border: 'none', cursor: !input.trim() || !canType ? 'not-allowed' : 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                   }} aria-label="Send">
@@ -618,7 +617,7 @@ export default function InterviewChat({
                   aria-label={isRecording ? t.tap_to_stop : t.tap_to_record}
                   style={{
                     width: 64, height: 64, borderRadius: 32,
-                    background: isRecording ? '#9B2335' : (isTyping || isTranscribing || messages.length === 0 ? '#E2E0DA' : '#0F3D3E'),
+                    background: isRecording ? '#9B2335' : (isTyping || isTranscribing || messages.length === 0 ? '#E2E0DA' : '#0A0A0A'),
                     border: 'none',
                     cursor: isTyping || isTranscribing || messages.length === 0 ? 'not-allowed' : 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -674,7 +673,7 @@ function ModeToggle({
     cursor: disabled ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
     transition: 'all 0.15s', opacity: disabled ? 0.5 : 1,
   }
-  const active: React.CSSProperties = { background: '#0F3D3E', color: '#FFFFFF', borderColor: '#0F3D3E' }
+  const active: React.CSSProperties = { background: '#0A0A0A', color: '#FFFFFF', borderColor: '#0A0A0A' }
   return (
     <div style={wrap}>
       <span style={{ textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</span>

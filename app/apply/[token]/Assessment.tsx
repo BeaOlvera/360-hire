@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Question, RawAnswers } from '@/lib/assessments'
+import Logo from '@/components/Logo'
 
 const I18N = {
   en: {
@@ -101,10 +102,9 @@ export default function Assessment({ token, code, name, description, intro, esti
     <div style={{ minHeight: '100vh', background: '#F5F4F0', padding: '24px 16px' }}>
       <div style={{ maxWidth: 760, margin: '0 auto', background: '#FFFFFF', border: '1px solid #E2E0DA', borderRadius: 18, overflow: 'hidden' }}>
 
-        <div style={{ background: '#0F3D3E', color: '#FFFFFF', padding: '22px 28px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-            <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(255,255,255,0.16)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 9 }}>360</div>
-            <span style={{ fontSize: 14, fontWeight: 700 }}>360 Hire</span>
+        <div style={{ background: '#0A0A0A', color: '#FFFFFF', padding: '22px 28px' }}>
+          <div style={{ marginBottom: 12 }}>
+            <Logo variant="light" height={20} />
           </div>
           <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.4px', margin: 0 }}>{name}</h1>
           <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.78)', margin: '6px 0 0' }}>{t.estimate(estimatedMinutes)} · {description}</p>
@@ -117,7 +117,7 @@ export default function Assessment({ token, code, name, description, intro, esti
         {/* progress */}
         <div style={{ padding: '14px 28px', display: 'flex', alignItems: 'center', gap: 14, borderBottom: '1px solid #F0EEE8' }}>
           <div style={{ flex: 1, height: 6, background: '#E2E0DA', borderRadius: 99, overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: `${pct}%`, background: '#0F3D3E', borderRadius: 99, transition: 'width 0.2s' }} />
+            <div style={{ height: '100%', width: `${pct}%`, background: '#0A0A0A', borderRadius: 99, transition: 'width 0.2s' }} />
           </div>
           <span style={{ fontSize: 12, color: '#6B6B6B', fontWeight: 600 }}>{answeredCount} {t.of} {total}</span>
         </div>
@@ -136,7 +136,7 @@ export default function Assessment({ token, code, name, description, intro, esti
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
             <button onClick={handleSubmit} disabled={submitting}
               style={{
-                background: submitting ? '#AEABA3' : '#0F3D3E', color: '#FFFFFF', border: 'none',
+                background: submitting ? '#AEABA3' : '#0A0A0A', color: '#FFFFFF', border: 'none',
                 borderRadius: 10, padding: '11px 22px', fontSize: 13, fontWeight: 600,
                 cursor: submitting ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
               }}>
@@ -172,9 +172,9 @@ function QuestionRow({
             return (
               <button key={n} type="button" onClick={() => onChange(n)}
                 style={{
-                  background: selected ? '#0F3D3E' : '#FFFFFF',
+                  background: selected ? '#0A0A0A' : '#FFFFFF',
                   color: selected ? '#FFFFFF' : '#0A0A0A',
-                  border: `1px solid ${selected ? '#0F3D3E' : '#E2E0DA'}`,
+                  border: `1px solid ${selected ? '#0A0A0A' : '#E2E0DA'}`,
                   borderRadius: 10, padding: '10px 6px', fontSize: 12, fontWeight: 600,
                   cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.12s',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
@@ -192,9 +192,9 @@ function QuestionRow({
             return (
               <button key={o.value} type="button" onClick={() => onChange(o.value)}
                 style={{
-                  background: selected ? '#0F3D3E' : '#FFFFFF',
+                  background: selected ? '#0A0A0A' : '#FFFFFF',
                   color: selected ? '#FFFFFF' : '#0A0A0A',
-                  border: `1px solid ${selected ? '#0F3D3E' : '#E2E0DA'}`,
+                  border: `1px solid ${selected ? '#0A0A0A' : '#E2E0DA'}`,
                   borderRadius: 10, padding: '11px 14px', fontSize: 13, fontWeight: 500,
                   cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
                   display: 'flex', alignItems: 'flex-start', gap: 10, lineHeight: 1.5,

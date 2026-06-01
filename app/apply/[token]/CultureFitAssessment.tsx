@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { CULTURE_FIT_DIMENSIONS, CULTURE_FIT_TYPE_META, type CultureType } from '@/lib/assessments/culture_fit'
+import Logo from '@/components/Logo'
 
 const TYPES: CultureType[] = ['CLAN', 'ADHOCRACY', 'MARKET', 'HIERARCHY']
 
@@ -157,9 +158,8 @@ export default function CultureFitAssessment({ token, language, estimatedMinutes
       <div style={{ maxWidth: 760, margin: '0 auto', background: '#FFFFFF', border: '1px solid #E2E0DA', borderRadius: 18, overflow: 'hidden' }}>
 
         <div style={{ background: '#0A0A0A', color: '#FFFFFF', padding: '22px 28px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-            <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(255,255,255,0.14)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 9 }}>360</div>
-            <span style={{ fontSize: 14, fontWeight: 700 }}>360 Hire</span>
+          <div style={{ marginBottom: 12 }}>
+            <Logo variant="light" height={20} />
           </div>
           <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.4px', margin: 0 }}>{t.title}</h1>
           <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.78)', margin: '6px 0 0' }}>{t.estimate(estimatedMinutes)}</p>
