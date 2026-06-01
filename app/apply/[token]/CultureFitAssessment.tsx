@@ -9,10 +9,11 @@ const TYPES: CultureType[] = ['CLAN', 'ADHOCRACY', 'MARKET', 'HIERARCHY']
 const I18N = {
   en: {
     title: 'Culture Fit',
-    intro: 'For each of the six items below, distribute 100 points across the four statements based on how much each describes the kind of organization you most want to work in. The total must be 100 per item.',
+    intro: 'For each of the six items below, distribute 100 points across the four statements based on how much each describes the kind of organization you most want to work in. As you move a slider, the others adjust automatically so the total always stays at 100.',
     pointsRemaining: 'remaining',
     total: 'Total',
-    needs100: 'Each block must total exactly 100 points.',
+    needs100: 'These blocks still need adjusting:',
+    needsThis: (n: number) => n > 0 ? `${n} points missing` : `${Math.abs(n)} points over`,
     submit: 'Save and continue',
     submitting: 'Saving...',
     failed: 'Could not save your answers. Please try again.',
@@ -20,10 +21,11 @@ const I18N = {
   },
   es: {
     title: 'Encaje Cultural',
-    intro: 'Para cada uno de los seis bloques, reparte 100 puntos entre las cuatro afirmaciones según cuánto describe cada una el tipo de organización en la que más quieres trabajar. El total debe ser 100 por bloque.',
+    intro: 'Para cada uno de los seis bloques, reparte 100 puntos entre las cuatro afirmaciones según cuánto describe cada una el tipo de organización en la que más quieres trabajar. Cuando muevas una barra, las otras se ajustarán automáticamente para que el total siempre sea 100.',
     pointsRemaining: 'restantes',
     total: 'Total',
-    needs100: 'Cada bloque debe sumar exactamente 100 puntos.',
+    needs100: 'Estos bloques aún necesitan ajustarse:',
+    needsThis: (n: number) => n > 0 ? `faltan ${n} puntos` : `sobran ${Math.abs(n)} puntos`,
     submit: 'Guardar y continuar',
     submitting: 'Guardando...',
     failed: 'No se pudieron guardar tus respuestas. Inténtalo de nuevo.',
@@ -38,9 +40,50 @@ type Allocations = Record<string, Record<CultureType, number>>
 function freshAllocations(): Allocations {
   const out: Allocations = {}
   for (const d of CULTURE_FIT_DIMENSIONS) {
-    out[d.id] = { CLAN: 0, ADHOCRACY: 0, MARKET: 0, HIERARCHY: 0 }
+    // Start each dimension at an even 25/25/25/25 split so the total is already
+    // 100 and the candidate sees the auto-rebalance behaviour from move one.
+    out[d.id] = { CLAN: 25, ADHOCRACY: 25, MARKET: 25, HIERARCHY: 25 }
   }
   return out
+}
+
+// Rebalance the four values so they sum to exactly 100 after one of them moves.
+// The changed value is held fixed; the remaining points (100 - new value) are
+// distributed across the other three proportionally to their previous values.
+// If all "others" were zero, distribute the remainder equally across them.
+function rebalance(prev: Record<CultureType, number>, changedKey: CultureType, newValue: number): Record<CultureType, number> {
+  const v = Math.max(0, Math.min(100, Math.round(newValue)))
+  const otherKeys = TYPES.filter((k) => k !== changedKey)
+  const remaining = 100 - v
+  const otherSum = otherKeys.reduce((s, k) => s + prev[k], 0)
+  const next: Record<CultureType, number> = { ...prev, [changedKey]: v }
+  if (remaining <= 0) {
+    for (const k of otherKeys) next[k] = 0
+    next[changedKey] = 100
+    return next
+  }
+  if (otherSum === 0) {
+    const base = Math.floor(remaining / otherKeys.length)
+    let leftover = remaining - base * otherKeys.length
+    for (const k of otherKeys) {
+      next[k] = base + (leftover > 0 ? 1 : 0)
+      if (leftover > 0) leftover--
+    }
+    return next
+  }
+  // Proportional share, then snap to integers preserving the sum
+  const raw = otherKeys.map((k) => ({ k, v: (prev[k] / otherSum) * remaining }))
+  const floored = raw.map((r) => ({ k: r.k, v: Math.floor(r.v), frac: r.v - Math.floor(r.v) }))
+  let usedSum = floored.reduce((s, r) => s + r.v, 0)
+  // Distribute leftover by largest fractional part first
+  const order = [...floored].sort((a, b) => b.frac - a.frac)
+  let leftover = remaining - usedSum
+  for (const r of order) {
+    if (leftover <= 0) break
+    r.v += 1; leftover--
+  }
+  for (const r of floored) next[r.k] = r.v
+  return next
 }
 
 export default function CultureFitAssessment({ token, language, estimatedMinutes }: Props) {
@@ -65,8 +108,8 @@ export default function CultureFitAssessment({ token, language, estimatedMinutes
     try { localStorage.setItem(storageKey, JSON.stringify(allocs)) } catch { /* ignore */ }
   }, [allocs, storageKey])
 
-  function setPoints(dimId: string, t: CultureType, value: number) {
-    setAllocs((prev) => ({ ...prev, [dimId]: { ...prev[dimId], [t]: Math.max(0, Math.min(100, value)) } }))
+  function setPoints(dimId: string, key: CultureType, value: number) {
+    setAllocs((prev) => ({ ...prev, [dimId]: rebalance(prev[dimId], key, value) }))
   }
 
   const dimSums = useMemo(() => {
@@ -78,10 +121,15 @@ export default function CultureFitAssessment({ token, language, estimatedMinutes
   }, [allocs])
 
   const allGood = CULTURE_FIT_DIMENSIONS.every((d) => dimSums[d.id] === 100)
+  const badDims = CULTURE_FIT_DIMENSIONS.filter((d) => dimSums[d.id] !== 100)
 
   async function handleSubmit() {
     setError('')
-    if (!allGood) { setError(t.needs100); return }
+    if (!allGood) {
+      const list = badDims.map((d) => `"${d.title[language]}" (${t.needsThis(100 - dimSums[d.id])})`).join('; ')
+      setError(`${t.needs100} ${list}`)
+      return
+    }
     setSubmitting(true)
     try {
       // Flatten to q{id}_{TYPE} key shape that the score function expects
@@ -108,9 +156,9 @@ export default function CultureFitAssessment({ token, language, estimatedMinutes
     <div style={{ minHeight: '100vh', background: '#F5F4F0', padding: '24px 16px' }}>
       <div style={{ maxWidth: 760, margin: '0 auto', background: '#FFFFFF', border: '1px solid #E2E0DA', borderRadius: 18, overflow: 'hidden' }}>
 
-        <div style={{ background: '#0F3D3E', color: '#FFFFFF', padding: '22px 28px' }}>
+        <div style={{ background: '#0A0A0A', color: '#FFFFFF', padding: '22px 28px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-            <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(255,255,255,0.16)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 9 }}>360</div>
+            <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(255,255,255,0.14)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 9 }}>360</div>
             <span style={{ fontSize: 14, fontWeight: 700 }}>360 Hire</span>
           </div>
           <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.4px', margin: 0 }}>{t.title}</h1>
@@ -129,8 +177,8 @@ export default function CultureFitAssessment({ token, language, estimatedMinutes
               <div key={d.id} style={{ marginBottom: 26, paddingBottom: 22, borderBottom: idx < CULTURE_FIT_DIMENSIONS.length - 1 ? '1px solid #F0EEE8' : 'none' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
                   <h3 style={{ fontSize: 14, fontWeight: 700, color: '#0A0A0A', margin: 0 }}>{d.title[language]}</h3>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: isBad ? '#9B2335' : '#2D6A4F' }}>
-                    {t.total}: {dimSums[d.id]} / 100 {remaining !== 0 && ` · ${remaining > 0 ? `+${remaining}` : remaining} ${t.pointsRemaining}`}
+                  <span style={{ fontSize: 12, fontWeight: 700, color: isBad ? '#9B2335' : '#0A0A0A' }}>
+                    {t.total}: {dimSums[d.id]} / 100
                   </span>
                 </div>
                 {TYPES.map((k) => {
@@ -161,7 +209,7 @@ export default function CultureFitAssessment({ token, language, estimatedMinutes
 
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <button onClick={handleSubmit} disabled={submitting || !allGood}
-              style={{ background: submitting || !allGood ? '#AEABA3' : '#0F3D3E', color: '#FFFFFF', border: 'none', borderRadius: 10, padding: '11px 22px', fontSize: 13, fontWeight: 600, cursor: submitting || !allGood ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}>
+              style={{ background: submitting || !allGood ? '#AEABA3' : '#0A0A0A', color: '#FFFFFF', border: 'none', borderRadius: 10, padding: '11px 22px', fontSize: 13, fontWeight: 600, cursor: submitting || !allGood ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}>
               {submitting ? t.submitting : t.submit}
             </button>
           </div>

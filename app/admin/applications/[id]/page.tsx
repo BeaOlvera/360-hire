@@ -169,11 +169,12 @@ export default async function ApplicationReviewPage({ params }: { params: { id: 
                   {messages.map((m, i) => (
                     <div key={i} style={{
                       padding: '10px 14px', borderRadius: 12, fontSize: 13, lineHeight: 1.6,
-                      background: m.role === 'assistant' ? '#F5F4F0' : '#EAF4EF',
+                      background: m.role === 'assistant' ? '#F5F4F0' : '#FFFFFF',
                       color: '#0A0A0A',
-                      borderLeft: m.role === 'assistant' ? '3px solid #0F3D3E' : '3px solid #2D6A4F',
+                      border: m.role === 'assistant' ? '1px solid #E2E0DA' : '1px solid #E2E0DA',
+                      borderLeft: m.role === 'assistant' ? '3px solid #0A0A0A' : '3px solid #AEABA3',
                     }}>
-                      <p style={{ fontSize: 10, fontWeight: 700, color: m.role === 'assistant' ? '#0F3D3E' : '#2D6A4F', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 4 }}>
+                      <p style={{ fontSize: 10, fontWeight: 700, color: m.role === 'assistant' ? '#0A0A0A' : '#6B6B6B', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 4 }}>
                         {m.role === 'assistant' ? 'Interviewer' : 'Candidate'}
                       </p>
                       <p>{m.content}</p>

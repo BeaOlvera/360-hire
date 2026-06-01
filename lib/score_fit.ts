@@ -53,8 +53,9 @@ Output STRICT JSON matching this TypeScript type:
 Rules:
 - Extract 4-7 competencies from the JD. Do not invent generic ones not relevant to this role.
 - "evidence" and "gaps" must be grounded in the transcript or CV. If CV/transcript is silent on a topic, list it as a gap, not as evidence.
-- "overall_fit" must equal (sum of weight*score) / 5.
-- "recommendation" maps approximately to overall_fit: strong_hire >= 0.80, hire >= 0.65, maybe >= 0.45, no_hire < 0.45 — but the recommendation can override this if there is a serious red flag.
+- "overall_fit" must equal (sum of weight*score) / 5, AND must fall inside the band of the recommendation you choose. They MUST tell the same story; a high overall_fit with "no_hire" is never acceptable.
+- Recommendation bands (strict): strong_hire 0.80-1.00, hire 0.65-0.79, maybe 0.45-0.64, no_hire 0.00-0.44.
+- If a risk flag warrants downgrading the candidate, you MUST also lower the competency scores (and therefore the overall_fit) so that both fit and recommendation reflect the same verdict. Do NOT keep competency scores artificially high and then drop the recommendation — instead, push the relevant competency scores down with the risk flag cited as a gap.
 - Write in plain natural language. Never use em dashes or en dashes (the "—" or "–" characters); use commas, parentheses, colons, or separate sentences instead.
 - Output JSON only, no surrounding prose.`
 
@@ -86,8 +87,9 @@ Reglas:
 - El contenido de los textos (one_line_summary, evidence, gaps, strengths, concerns, risk_flags, next_steps) debe estar en ESPAÑOL con tildes y signos de apertura ¿ ¡.
 - Extrae 4-7 competencias de la descripción del puesto. No inventes competencias genéricas no relevantes.
 - Las "evidence" y "gaps" deben fundamentarse en la transcripción o el CV. Si no hay información, listarlo como gap, no como evidence.
-- "overall_fit" debe igualar (suma de weight*score) / 5.
-- "recommendation": strong_hire >= 0.80, hire >= 0.65, maybe >= 0.45, no_hire < 0.45, salvo bandera roja seria.
+- "overall_fit" debe igualar (suma de weight*score) / 5 Y debe estar dentro de la banda de la recomendación que elijas. Tienen que contar la misma historia: un overall_fit alto con "no_hire" nunca es aceptable.
+- Bandas estrictas de la recomendación: strong_hire 0.80-1.00, hire 0.65-0.79, maybe 0.45-0.64, no_hire 0.00-0.44.
+- Si una bandera de riesgo justifica bajar la recomendación, DEBES también bajar las puntuaciones de competencia (y por tanto el overall_fit) para que el encaje y la recomendación reflejen el mismo veredicto. NO mantengas competencias artificialmente altas y luego rebajes la recomendación: en su lugar, baja las puntuaciones de las competencias afectadas citando la bandera roja como gap.
 - Escribe en lenguaje natural. Nunca uses la raya ni el guion largo (los caracteres "—" o "–"); usa comas, paréntesis, dos puntos o frases separadas.
 - Devuelve solo el JSON, sin texto adicional.`
 
@@ -177,14 +179,19 @@ function parseFitResult(raw: string): FitResult {
 
   const weighted = competencies.reduce((s, c) => s + c.weight * c.score, 0)
   const computedFit = competencies.length > 0 ? weighted / 5 : 0
-  const overall_fit = isFinite(Number(parsed.overall_fit))
+  const rawFit = isFinite(Number(parsed.overall_fit))
     ? clamp01(Number(parsed.overall_fit))
     : clamp01(computedFit)
 
   const recValue = String(parsed.recommendation ?? '')
   const recommendation = (['strong_hire', 'hire', 'maybe', 'no_hire'] as const).includes(recValue as any)
     ? (recValue as FitResult['recommendation'])
-    : recommendationFromFit(overall_fit)
+    : recommendationFromFit(rawFit)
+
+  // Reconcile: if the model's overall_fit falls outside the band of its own
+  // recommendation, snap it into the band. The displayed % must agree with
+  // the displayed verdict — otherwise readers see "100% — Do not hire".
+  const overall_fit = reconcileFitToRec(rawFit, recommendation)
 
   return {
     overall_fit,
@@ -205,4 +212,16 @@ function recommendationFromFit(f: number): FitResult['recommendation'] {
   if (f >= 0.65) return 'hire'
   if (f >= 0.45) return 'maybe'
   return 'no_hire'
+}
+function bandFor(rec: FitResult['recommendation']): [number, number] {
+  if (rec === 'strong_hire') return [0.80, 1.00]
+  if (rec === 'hire')        return [0.65, 0.7999]
+  if (rec === 'maybe')       return [0.45, 0.6499]
+  return [0.00, 0.4499]
+}
+function reconcileFitToRec(fit: number, rec: FitResult['recommendation']): number {
+  const [lo, hi] = bandFor(rec)
+  if (fit < lo) return Math.min(lo + 0.05, hi)
+  if (fit > hi) return Math.max(hi - 0.05, lo)
+  return fit
 }

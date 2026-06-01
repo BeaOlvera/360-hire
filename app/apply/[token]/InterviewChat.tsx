@@ -398,6 +398,15 @@ export default function InterviewChat({
 
   const canType = !isTyping && !isTranscribing && !isRecording && messages.length > 0 && !isComplete
 
+  // Keep cursor in the textarea after the interviewer replies. Without this the
+  // candidate has to click back into the input every turn (reported by the
+  // partner test, 2026-06-01).
+  useEffect(() => {
+    if (canType && inputMode === 'text' && inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [canType, inputMode])
+
   return (
     <div style={{ minHeight: '100vh', background: '#F5F4F0', display: 'flex', flexDirection: 'column' }}>
 
