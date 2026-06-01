@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Guía de prueba — 360 Hire</title>
+<title>Guía de prueba — Zephyron Hire</title>
 <style>
   :root {
     --ink:        #0A0A0A;
@@ -17,6 +17,8 @@
     --alert:      #9B2335;
     --alert-bg:   #FBEAEC;
     --alert-line: #F5C5CB;
+    --hi-bg:      #EAEAEA;
+    --hi-line:    #D5D3CE;
   }
   * { box-sizing: border-box; }
   body {
@@ -27,16 +29,13 @@
     line-height: 1.6;
     font-size: 15px;
   }
-  .wrap {
-    max-width: 880px;
-    margin: 0 auto;
-    padding: 56px 28px 80px;
-  }
-  header {
+  .wrap { max-width: 880px; margin: 0 auto; padding: 56px 28px 80px; }
+  header.top {
     border-bottom: 1px solid var(--line);
     padding-bottom: 28px;
     margin-bottom: 36px;
   }
+  .brandmark { margin-bottom: 12px; }
   .eyebrow {
     font-size: 11px;
     font-weight: 700;
@@ -52,11 +51,7 @@
     margin: 0 0 10px;
     font-weight: 700;
   }
-  .lede {
-    font-size: 15px;
-    color: var(--muted);
-    margin: 0;
-  }
+  .lede { font-size: 15px; color: var(--muted); margin: 0; }
   section { margin-bottom: 40px; }
   h2 {
     font-size: 12px;
@@ -74,10 +69,9 @@
     color: var(--ink);
   }
   p { margin: 0 0 12px; color: var(--mid); }
-  p strong { color: var(--ink); }
+  p strong, li strong { color: var(--ink); }
   ol, ul { padding-left: 22px; margin: 0 0 14px; color: var(--mid); }
   ol li, ul li { margin-bottom: 8px; }
-  ol li strong, ul li strong { color: var(--ink); }
   a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
   code, pre {
     font-family: "SF Mono", Menlo, Consolas, monospace;
@@ -106,12 +100,11 @@
     padding: 22px 26px;
     margin-bottom: 16px;
   }
-  .card.alert {
-    background: var(--alert-bg);
-    border-color: var(--alert-line);
-  }
+  .card.alert { background: var(--alert-bg); border-color: var(--alert-line); }
   .card.alert h3 { color: var(--alert); }
   .card.alert p { color: var(--alert); }
+  .card.hi { background: var(--hi-bg); border-color: var(--hi-line); }
+  .card.hi h3 { color: var(--ink); }
   .pill {
     display: inline-block;
     font-size: 10px;
@@ -124,6 +117,7 @@
     border-radius: 8px;
     margin-right: 4px;
   }
+  .pill.new { background: var(--ink); color: var(--paper); }
   table {
     width: 100%;
     border-collapse: collapse;
@@ -149,15 +143,8 @@
     text-transform: uppercase;
   }
   tr:last-child td { border-bottom: none; }
-  td:first-child { color: var(--ink); font-weight: 600; width: 32%; }
-  footer {
-    border-top: 1px solid var(--line);
-    margin-top: 48px;
-    padding-top: 20px;
-    text-align: center;
-    color: var(--faint);
-    font-size: 12px;
-  }
+  td:first-child { color: var(--ink); font-weight: 600; width: 30%; }
+  footer { border-top: 1px solid var(--line); margin-top: 48px; padding-top: 20px; text-align: center; color: var(--faint); font-size: 12px; }
   @media (max-width: 600px) {
     .wrap { padding: 32px 18px 56px; }
     h1 { font-size: 26px; }
@@ -171,26 +158,110 @@
 <body>
 <div class="wrap">
 
-<header>
-  <p class="eyebrow">Guía de prueba</p>
-  <h1>360 Hire — qué es y cómo probarlo</h1>
-  <p class="lede">Una guía paso a paso para entender la plataforma y validar el flujo completo, desde la creación de un puesto hasta el informe final del candidato.</p>
+<header class="top">
+  <div class="brandmark">
+    <svg viewBox="0 0 200 50" height="28" style="display:block;height:28px;width:auto" role="img" aria-label="Zephyron Hire">
+      <text x="0" y="34" font-family="-apple-system, Segoe UI, Roboto, sans-serif" font-weight="800" font-size="26" letter-spacing="-0.6" fill="#0A0A0A">Zephyron</text>
+      <line x1="124" y1="11" x2="124" y2="39" stroke="#AEABA3" stroke-width="1"/>
+      <text x="132" y="34" font-family="-apple-system, Segoe UI, Roboto, sans-serif" font-weight="400" font-size="26" letter-spacing="-0.2" fill="#6B6B6B">Hire</text>
+    </svg>
+  </div>
+  <p class="eyebrow">Guía de prueba · v2</p>
+  <h1>Zephyron Hire — qué probar y qué retestear</h1>
+  <p class="lede">Versión actualizada tras tu feedback. Incluye una sección al principio con lo que conviene retestear específicamente; el resto es el recorrido completo desde cero por si quieres probarlo todo en limpio.</p>
 </header>
+
+<!-- ====================================================================== -->
+
+<section>
+  <h2>Cambios desde la versión anterior</h2>
+
+  <div class="card hi">
+    <h3><span class="pill new">Nuevo</span> Lo que ha cambiado tras tus comentarios</h3>
+    <ul>
+      <li><strong>Branding rehecho.</strong> El logo "360" cajita ha desaparecido. Ahora el wordmark es <strong>Zephyron|Hire</strong> en negro/gris/blanco en todos los emails, pantallas e informes. Paleta monocroma estricta.</li>
+      <li><strong>Voz de la IA.</strong> Se ha sustituido la voz robótica del navegador por <strong>OpenAI TTS</strong> (voz "nova"). Es la misma voz durante toda la entrevista. Mucho más natural en EN y ES.</li>
+      <li><strong>Encaje cultural (OCAI).</strong> Las barritas ahora <strong>se reequilibran automáticamente</strong> al mover una para que cada bloque sume siempre 100. Si por algún motivo no llega a 100, sale un mensaje claro que dice exactamente qué bloque y cuántos puntos faltan.</li>
+      <li><strong>Chat:</strong> el cursor ya se queda dentro del cuadro de texto al recibir respuesta de la entrevistadora. Ya no hay que clicar de nuevo cada vez.</li>
+      <li><strong>Transcripción admin:</strong> el texto del candidato ya <strong>no aparece en verde</strong> (parecía aprobado). Está en gris neutro como el entrevistador.</li>
+      <li><strong>Frases "tipo coach" del chat eliminadas.</strong> El sistema ahora prohíbe explícitamente "agradezco tu honestidad", "qué buen ejemplo", "valiente que lo compartas", etc. Cuando recibe respuestas cortas o vagas, sigue insistiendo en concreción.</li>
+      <li><strong>Fit Report — bug arreglado.</strong> Ya no puede salir "100% encaje + NO CONTRATAR". El sistema reconcilia la puntuación y la recomendación: si recomienda no contratar, la puntuación baja a su banda correspondiente y viceversa.</li>
+      <li><strong>Comprehensive Report — caché y feedback de progreso.</strong> La primera vez se abre una nueva pestaña con un spinner claro que dice "Generando informe completo, puede tardar 20-40s, no cierres esta pestaña". A partir de la segunda vez es <strong>instantáneo</strong> (se cachea en BD). Hay un botón "↻ regen" para forzar regeneración cuando hayan llegado datos nuevos.</li>
+      <li><strong>Comprehensive Report — sin inferencias arriesgadas.</strong> El prompt prohíbe explícitamente sacar conclusiones a partir de menciones personales (hijos, pareja, edad, etc.). El ejemplo concreto que detectaste ("mención espontánea de tener una hija → disponibilidad para viajar") está literalmente en la lista negra del sistema.</li>
+      <li><strong>Disclaimer anti-ChatGPT</strong> en el consentimiento inicial. La persona candidata debe aceptar explícitamente que sus respuestas serán suyas y no asistidas por IA externa.</li>
+      <li><strong>Tiempo total estimado</strong> visible y prominente en la pantalla de bienvenida: suma minutos de cuestionarios + 30-45 min de entrevista. El email ya lo dice también.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ====================================================================== -->
+
+<section>
+  <h2>Lo que más conviene retestear ahora</h2>
+  <p>Si quieres centrarte solo en validar lo nuevo, prueba estos 8 escenarios:</p>
+
+  <table>
+    <thead>
+      <tr><th>Caso</th><th>Qué hacer y qué mirar</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Voz de la IA</td>
+        <td>Inicia una entrevista, activa la voz IA en el toggle "Voz IA → Voz", y comprueba que <strong>es la misma voz "nova" todo el rato</strong>, suena natural y no cambia de género. Pruébala en EN y en ES.</td>
+      </tr>
+      <tr>
+        <td>Cursor del chat</td>
+        <td>En la entrevista, en modo texto, escribe una respuesta, dale Enter, espera la respuesta de la IA y comprueba que <strong>puedes seguir escribiendo sin clicar</strong>.</td>
+      </tr>
+      <tr>
+        <td>Encaje cultural (OCAI)</td>
+        <td>Llega al cuestionario de Culture Fit. Verás que cada bloque <strong>empieza a 25/25/25/25</strong>. Mueve una barrita — las otras se ajustan. Intenta hacer trampa: pon un valor numérico que rompa el 100 y al pulsar "Continuar" debe salir <strong>un mensaje rojo claro</strong> con el bloque y los puntos que faltan.</td>
+      </tr>
+      <tr>
+        <td>Tono del chat (sin coaching)</td>
+        <td>Da una respuesta muy corta o muy vaga ("trabajo en equipo") y observa que <strong>la entrevistadora te pide concreción</strong>. Da una respuesta sincera sobre un fracaso — no debe decir "agradezco tu honestidad" ni nada parecido, debe pasar al siguiente sondeo.</td>
+      </tr>
+      <tr>
+        <td>Transcripción admin</td>
+        <td>Vuelve al admin y abre la entrevista de un candidato. La transcripción debe mostrar las respuestas del candidato en <strong>gris neutro, no verde</strong>.</td>
+      </tr>
+      <tr>
+        <td>Fit Report consistente</td>
+        <td>Genera el informe Fit de un candidato. Verifica que <strong>el % de encaje y la etiqueta (Contratar / Tal vez / No contratar) siempre se corresponden</strong>: nunca 90%+ con "No contratar", nunca 30% con "Contratar firme".</td>
+      </tr>
+      <tr>
+        <td>Comprehensive Report</td>
+        <td>Pulsa "Comprehensive report" en la ficha del candidato. Se abre una nueva pestaña con un spinner claro que indica que está generándose. Espera 20-40s. Cuando aparezca, pulsa "Comprehensive report" otra vez — la segunda vez debe ser <strong>instantáneo</strong>. Si quieres forzar una nueva generación, usa el botón <strong>"↻ regen"</strong>.</td>
+      </tr>
+      <tr>
+        <td>Disclaimer anti-ChatGPT</td>
+        <td>Pasa por el consentimiento inicial de un candidato. Verifica que aparece el punto sobre <strong>autenticidad y prohibición de ChatGPT</strong> y que hay que marcar la casilla para continuar.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ====================================================================== -->
+
+<section>
+  <h2>Recorrido completo (para una prueba en limpio)</h2>
+  <p>Si prefieres probar todo el flujo desde cero, sigue estos pasos en orden.</p>
+</section>
 
 <section>
   <h2>0 · Antes de empezar</h2>
   <div class="card">
     <ul>
       <li><strong>URL:</strong> <a href="https://360-hire.vercel.app">https://360-hire.vercel.app</a></li>
-      <li><strong>Contraseña de admin:</strong> pídesela a Bea (se introduce una sola vez al entrar en <code>/admin</code>).</li>
-      <li><strong>Correo de prueba:</strong> usa una dirección a la que tengas acceso para recibir el correo de invitación del candidato. Te servirá tu propio Gmail u Outlook.</li>
+      <li><strong>Contraseña de admin:</strong> pídesela a Bea.</li>
+      <li><strong>Correo de prueba:</strong> usa una dirección a la que tengas acceso para recibir la invitación.</li>
     </ul>
   </div>
 </section>
 
 <section>
-  <h2>1 · ¿Qué es 360 Hire?</h2>
-  <p>Es una plataforma para evaluar candidatos. Tú creas un puesto, invitas a una persona por correo y ella sube su CV, contesta unos cuestionarios y mantiene una entrevista por chat (y voz, si quiere) con un asistente de inteligencia artificial. Después tú, como administrador, ves un informe completo con su encaje cultural, su perfil de personalidad, su razonamiento, su resiliencia y un resumen ejecutivo con recomendación de contratación.</p>
+  <h2>1 · ¿Qué es Zephyron Hire?</h2>
+  <p>Es una plataforma para evaluar candidatos. Tú creas un puesto, invitas a una persona por correo y ella sube su CV, contesta unos cuestionarios y mantiene una entrevista por chat o por voz con un asistente de inteligencia artificial. Después tú, como administrador, ves un informe completo con su encaje cultural, su perfil de personalidad, su razonamiento, su resiliencia y un resumen ejecutivo con recomendación de contratación.</p>
 </section>
 
 <section>
@@ -205,17 +276,12 @@
 <section>
   <h2>3 · Crear un puesto de prueba</h2>
   <ol>
-    <li>Pulsa <strong>«Nuevo puesto»</strong> (botón arriba a la derecha del dashboard).</li>
-    <li>Tienes dos formas de rellenarlo:
-      <ul>
-        <li><strong>Opción A — Subir un PDF</strong> con la descripción del puesto. Pulsa «Upload JD» y la IA extrae título, descripción, nivel, idioma y competencias sugeridas. Revísalo todo antes de guardar.</li>
-        <li><strong>Opción B — Rellenarlo a mano</strong>: título, descripción, nivel, idioma de la entrevista (EN/ES) y hiring manager.</li>
-      </ul>
-    </li>
-    <li><strong>Competencias.</strong> Hay un botón <strong>«+ Pick from library»</strong> que abre el diccionario de competencias de Zephyron (Results Focus, Commercial Orientation, Innovation, etc., diez en total). Cada competencia añade su nombre y los comportamientos que el entrevistador IA va a explorar. También puedes añadir competencias libres con «+ Add custom competency». Marca cada una como <span class="pill">Critical</span> <span class="pill">Important</span> <span class="pill">Relevant</span> según su peso.</li>
-    <li><strong>Cuestionarios complementarios.</strong> Marca los que quieras que el candidato haga (Thinking Style, Growth, Career Values, Culture Fit, Big Five, Reasoning ICAR, Resilience). Puedes dejarlos sin marcar y elegirlos después candidato a candidato.</li>
-    <li><strong>Perfil de cultura de la empresa (OCAI).</strong> Aparece siempre. Reparte 100 puntos entre los cuatro cuadrantes (Clan, Adhocracy, Market, Hierarchy) describiendo cómo es la cultura para este puesto. Solo se usa si activas el cuestionario «Culture Fit», pero conviene dejarlo definido.</li>
-    <li>Pulsa <strong>«Create job»</strong>. Te lleva a la ficha del puesto.</li>
+    <li>Pulsa <strong>«Nuevo puesto»</strong>.</li>
+    <li>Rellénalo a mano o sube un PDF de descripción de puesto: la IA extrae título, idioma y competencias sugeridas.</li>
+    <li><strong>Competencias.</strong> Hay un botón <strong>«+ Pick from library»</strong> con 10 competencias del diccionario de Zephyron y sus comportamientos. También puedes añadir las tuyas. Marca cada una como <span class="pill">Critical</span> <span class="pill">Important</span> <span class="pill">Relevant</span>.</li>
+    <li><strong>Cuestionarios complementarios.</strong> Marca los que quieras por defecto (puedes anular esto por candidato).</li>
+    <li><strong>Perfil cultural OCAI.</strong> Reparte 100 puntos entre los cuatro cuadrantes describiendo la cultura del puesto. La comparación con el candidato solo se hará si activas el test "Culture Fit".</li>
+    <li>Pulsa <strong>«Create job»</strong>.</li>
   </ol>
 </section>
 
@@ -223,115 +289,66 @@
   <h2>4 · Invitar a un candidato</h2>
   <p>Dentro de la ficha del puesto verás un bloque <strong>«Invite a candidate»</strong>.</p>
   <ol>
-    <li>Rellena nombre, apellido, correo electrónico y elige idioma (EN/ES).</li>
-    <li><strong>Para probar la personalización</strong>, marca la casilla <strong>«Customise for this candidate»</strong>. Se despliega una sección con dos columnas:
-      <ul>
-        <li><strong>Questionnaires for this candidate.</strong> Aparecen los 7 cuestionarios. Los que el puesto tenga activados por defecto llevan una etiqueta <span class="pill">job default</span>. Puedes marcar o desmarcar los que quieras para <em>esta persona en concreto</em>.</li>
-        <li><strong>Competencies to explore.</strong> Aparecen las competencias del puesto. Si no quieres que el entrevistador profundice en alguna, desmárcala.</li>
-      </ul>
-    </li>
-    <li>Si no marcas «Customise», se envía la configuración completa del puesto.</li>
-    <li>Pulsa <strong>«Invite candidate»</strong>. El candidato recibe un correo de <strong>Zephyron Consulting &lt;hire@zephyronconsulting.com&gt;</strong> con un enlace personal.</li>
+    <li>Rellena nombre, apellido, correo, idioma (EN/ES).</li>
+    <li>Marca <strong>«Customise for this candidate»</strong> para abrir el picker donde puedes <strong>elegir cuestionarios y competencias</strong> específicos para esta persona. Aparecen los 7 cuestionarios; los que el puesto tenía activados por defecto llevan una etiqueta <span class="pill">job default</span>.</li>
+    <li>Pulsa <strong>«Invite candidate»</strong>. La persona recibe un correo de <strong>Zephyron Consulting &lt;hire@zephyronconsulting.com&gt;</strong> con un enlace personal y el <strong>nuevo logo Zephyron|Hire</strong> en la cabecera.</li>
   </ol>
   <div class="card">
-    <h3 style="font-size: 14px; margin-bottom: 8px;">Alternativa: evaluación genérica</h3>
-    <p style="margin: 0;">Puedes evaluar a alguien sin tener un puesto concreto. Entra en <code>/admin/candidates</code>, crea un candidato y pulsa <strong>«Start generic evaluation»</strong>. El correo es genérico («te vamos a evaluar para encajar en proyectos y oportunidades», no menciona ningún puesto en particular).</p>
+    <h3 style="font-size: 14px; margin-bottom: 8px;">Evaluación genérica</h3>
+    <p style="margin: 0;">Para evaluar sin puesto concreto: <code>/admin/candidates</code> → crear → <strong>«Start generic evaluation»</strong>. El correo es genérico (no menciona ningún puesto).</p>
   </div>
 </section>
 
 <section>
   <h2>5 · Lo que ve el candidato</h2>
-  <p>Abre el enlace del correo <strong>en una pestaña de incógnito</strong> (para no mezclar la sesión de admin) y sigue el flujo como si fueras la persona invitada:</p>
+  <p>Abre el enlace del correo <strong>en una pestaña de incógnito</strong> y haz el recorrido como si fueras la persona invitada:</p>
   <ol>
-    <li><strong>Aviso de privacidad y consentimiento.</strong> Debe aceptarlo para continuar.</li>
-    <li><strong>Vista general</strong> del proceso: cuántos cuestionarios, tiempo estimado, etc.</li>
+    <li><strong>Aviso de privacidad + consentimiento.</strong> Lee con atención el nuevo punto sobre <strong>autenticidad / no usar ChatGPT</strong>. Debes marcar la casilla para continuar.</li>
+    <li><strong>Pantalla de bienvenida.</strong> Aparece el <strong>tiempo total estimado</strong> (sumando cuestionarios + entrevista) como rango.</li>
     <li><strong>Sube el CV</strong> (PDF, máximo 15 MB).</li>
-    <li><strong>Cuestionarios.</strong> Los que tú hayas activado para él. Cada uno tarda entre 2 y 8 minutos:
+    <li><strong>Cuestionarios.</strong> Los que tú hayas activado para él. Entre 2 y 8 minutos cada uno:
       <ul>
-        <li>Thinking Style — estilo de pensamiento, 4 cuadrantes</li>
-        <li>Growth Orientation — mentalidad de crecimiento</li>
-        <li>Career Values — anclas de carrera</li>
-        <li>Culture Fit OCAI — reparto de 100 puntos</li>
-        <li>Big Five — personalidad IPIP</li>
-        <li>ICAR Reasoning — capacidad cognitiva, con respuestas correctas</li>
-        <li>Resilience — recuperación ante la adversidad</li>
+        <li>Thinking Style · Growth Orientation · Career Values</li>
+        <li>Culture Fit OCAI <span class="pill new">mejorado</span> con auto-rebalance</li>
+        <li>Big Five (IPIP)</li>
+        <li>ICAR Reasoning (con respuestas correctas)</li>
+        <li>Resilience</li>
       </ul>
     </li>
-    <li><strong>Entrevista por chat con IA.</strong> Pregunta por las competencias del puesto. El candidato puede escribir o hablar (icono de micrófono). La IA responde por texto y, si está activado, por voz.</li>
-    <li><strong>Cierre.</strong> La IA hace una última pregunta abierta y agradece. El candidato ve «evaluación completada».</li>
+    <li><strong>Entrevista por chat con IA.</strong> Pregunta por las competencias del puesto. El candidato puede escribir o hablar; la IA responde por texto o también por voz natural (OpenAI TTS) si lo activa. El cursor se queda en la caja.</li>
+    <li><strong>Cierre.</strong> La IA hace una última pregunta abierta y agradece. El candidato ve «evaluación completada» y la grabación de vídeo se sube automáticamente.</li>
   </ol>
 </section>
 
 <section>
-  <h2>6 · Revisar la evaluación como admin</h2>
-  <p>Vuelve a la pestaña de admin, entra en la ficha del candidato (o desde el puesto → la fila del candidato).</p>
+  <h2>6 · Revisar como admin</h2>
   <ol>
-    <li><strong>Job-fit score:</strong> porcentaje de encaje calculado a partir del CV, las competencias y la entrevista.</li>
-    <li><strong>Informe completo:</strong> pulsa «Generate comprehensive report». Tarda unos segundos. Obtienes un HTML con:
-      <ul>
-        <li>Resumen ejecutivo y recomendación</li>
-        <li>Encaje por competencia</li>
-        <li>Perfil de personalidad</li>
-        <li>Razonamiento</li>
-        <li>Resiliencia</li>
-        <li>Encaje cultural (comparado con el perfil OCAI del puesto)</li>
-        <li>Transcripción de la entrevista</li>
-      </ul>
-    </li>
-    <li><strong>Botón «Resend email»</strong> en la tarjeta del enlace, por si el candidato dice no haber recibido la invitación.</li>
-    <li><strong>Botón «Copy»</strong> para copiar el enlace directo del candidato y enviárselo por otra vía (WhatsApp, etc.).</li>
+    <li><strong>Job-fit score.</strong> El % y la etiqueta de recomendación son ahora consistentes entre sí (sin contradicciones).</li>
+    <li><strong>Informe Fit (HTML / PDF).</strong> Para ver y compartir el resultado del scoring.</li>
+    <li><strong>Comprehensive Report.</strong> Sintetiza CV + entrevista + todos los cuestionarios. Primer click ~30s con spinner claro en una nueva pestaña; segundo click <strong>instantáneo</strong> (caché). Botón "↻ regen" si llegan datos nuevos y quieres regenerarlo.</li>
+    <li><strong>Transcripción.</strong> Las respuestas del candidato salen en gris neutro, sin connotación de aprobado.</li>
+    <li><strong>Botones Resend / Copy</strong> de la invitación en la ficha del candidato.</li>
   </ol>
 </section>
 
 <section>
-  <h2>7 · Ejemplos disponibles</h2>
-  <p>Si quieres ver cómo queda un informe sin pasar por todo el flujo: en el dashboard hay un enlace <strong>«Samples»</strong> (también <code>/admin/samples</code>) con informes congelados de candidatos ficticios en las 9 variantes (sénior con buen encaje, perfil mixto, candidato no idóneo, etc.).</p>
-</section>
-
-<section>
-  <h2>8 · Casos que conviene probar</h2>
-  <table>
-    <thead>
-      <tr><th>Caso</th><th>Qué probar</th></tr>
-    </thead>
-    <tbody>
-      <tr><td>Crear puesto desde PDF</td><td>Sube un JD en PDF y revisa que la extracción acierta título, idioma y competencias.</td></tr>
-      <tr><td>Crear puesto en español</td><td>Que el correo y la entrevista salgan en castellano con tildes y signos <code>¿</code> <code>¡</code>.</td></tr>
-      <tr><td>Personalizar por candidato</td><td>Invita dos candidatos al mismo puesto: a uno márcale solo 3 cuestionarios y a otro los 7. Verifica que cada uno solo ve lo que le tocó.</td></tr>
-      <tr><td>Evaluación genérica</td><td>Crea un candidato sin puesto, lánzale una evaluación genérica y comprueba que el correo no menciona ningún puesto concreto.</td></tr>
-      <tr><td>Entrevista por voz</td><td>En la entrevista, prueba el micrófono y comprueba que transcribe bien.</td></tr>
-      <tr><td>Reenviar invitación</td><td>Pulsa «Resend email» y verifica que vuelve a llegar.</td></tr>
-      <tr><td>Volver atrás</td><td>Desde la ficha del candidato, usa el breadcrumb (All jobs · Job · Candidate profile). No debe dar 404.</td></tr>
-      <tr><td>Cultura del puesto</td><td>Crea un puesto con un reparto OCAI marcado (por ejemplo 40/30/20/10), invita a alguien con Culture Fit activado y mira el informe: debe comparar las dos distribuciones.</td></tr>
-      <tr><td>Competencias del diccionario</td><td>Crea un puesto eligiendo solo competencias del diccionario y verifica que la entrevista pregunta por los comportamientos correspondientes.</td></tr>
-    </tbody>
-  </table>
-</section>
-
-<section>
-  <h2>9 · Si algo da error</h2>
-
-  <div class="card alert">
-    <h3>«Página no encontrada (404)» al abrir el enlace del candidato</h3>
-    <p>Significa que la base de datos todavía no tiene aplicada la migración 007. Avísale a Bea para que ejecute en Supabase:</p>
-<pre><code>ALTER TABLE applications
-  ADD COLUMN IF NOT EXISTS assessments_override JSONB,
-  ADD COLUMN IF NOT EXISTS competencies_override JSONB;</code></pre>
-  </div>
-
+  <h2>7 · Si encuentras algún error</h2>
   <div class="card">
     <h3 style="font-size: 14px;">No llega el correo</h3>
-    <p style="margin: 0;">Revisa la carpeta de spam. Si sigue sin llegar, usa el botón <strong>«Copy»</strong> o <strong>«Resend email»</strong> desde la ficha del candidato.</p>
+    <p style="margin: 0;">Revisa spam. Usa <strong>«Copy»</strong> o <strong>«Resend email»</strong> desde la ficha del candidato.</p>
   </div>
-
   <div class="card">
-    <h3 style="font-size: 14px;">Cualquier otro error</h3>
-    <p style="margin: 0;">Anota qué hiciste (paso a paso) y mándale a Bea una captura de pantalla.</p>
+    <h3 style="font-size: 14px;">La voz de la IA no se escucha</h3>
+    <p style="margin: 0;">Algunos navegadores bloquean el audio hasta la primera interacción del usuario. Si no se oye nada al inicio, escribe una respuesta y al pulsar Enter el audio del siguiente mensaje debería sonar.</p>
+  </div>
+  <div class="card">
+    <h3 style="font-size: 14px;">Cualquier otra cosa rara</h3>
+    <p style="margin: 0;">Anota qué hiciste paso a paso y mándale a Bea una captura. Cuanta más información, antes lo arreglamos.</p>
   </div>
 </section>
 
 <footer>
-  ¡Suerte con la prueba! Cualquier sugerencia es bienvenida.
+  Zephyron Hire · guía actualizada a 2026-06-01
 </footer>
 
 </div>
