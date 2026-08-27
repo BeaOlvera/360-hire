@@ -7,7 +7,8 @@ export const maxDuration = 300
 /**
  * POST, store the continuous interview video recording in Supabase Storage (bucket: 'video').
  * Body: multipart/form-data with a `video` Blob (typically video/webm).
- * Saves the public URL on applications.video_url.
+ * Saves the Storage object PATH on applications.video_url. The bucket is private;
+ * the admin view mints a short-lived signed URL at render time (lib/storage.ts).
  *
  * NOTE: Supabase Storage on the free tier limits individual files to ~50 MB.
  * For 30 to 45 min sessions you may need to upgrade the project plan or
@@ -45,10 +46,9 @@ export async function POST(request: NextRequest, { params }: { params: { token: 
     console.error('Video storage upload failed:', upErr)
     return NextResponse.json({ error: `Failed to store video: ${upErr.message}` }, { status: 500 })
   }
-  const { data: pub } = supabaseAdmin.storage.from('video').getPublicUrl(objectPath)
-  const url = pub.publicUrl
-
-  await supabaseAdmin.from('applications').update({ video_url: url }).eq('id', app.id)
+  // Store the object path. Never a public URL: this recording is the candidate's
+  // face and voice, and must not be reachable without authentication.
+  await supabaseAdmin.from('applications').update({ video_url: objectPath }).eq('id', app.id)
 
   logAudit({
     action: 'video.uploaded',
@@ -58,5 +58,5 @@ export async function POST(request: NextRequest, { params }: { params: { token: 
     details: { bytes: buf.byteLength },
   })
 
-  return NextResponse.json({ ok: true, video_url: url })
+  return NextResponse.json({ ok: true })
 }

@@ -7,6 +7,7 @@ import { logAudit } from '@/lib/audit'
 import ScoringPanel from './ScoringPanel'
 import CandidateLinkCard from './CandidateLinkCard'
 import { ASSESSMENT_CODES, getAssessment, type AssessmentCode } from '@/lib/assessments'
+import { signedUrl } from '@/lib/storage'
 
 type Message = { role: 'assistant' | 'user'; content: string; created_at: string }
 
@@ -47,7 +48,14 @@ async function getApplication(id: string) {
     logAudit({ action: 'video.viewed', actorType: 'admin', resourceType: 'application', resourceId: app.id })
   }
 
-  return { app, messages: (messages ?? []) as Message[], assessmentRows: assessmentRows ?? [], openJobs }
+  // Candidate files live in private buckets. Mint short-lived signed URLs for
+  // this render only; never hand the client a durable link to a CV or recording.
+  const [videoSrc, cvSrc] = await Promise.all([
+    signedUrl(app.video_url, 'video'),
+    signedUrl(app.cv_url, 'cv'),
+  ])
+
+  return { app, messages: (messages ?? []) as Message[], assessmentRows: assessmentRows ?? [], openJobs, videoSrc, cvSrc }
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -78,7 +86,7 @@ export default async function ApplicationReviewPage({ params }: { params: { id: 
 
   const result = await getApplication(params.id)
   if (!result) notFound()
-  const { app, messages, assessmentRows, openJobs } = result
+  const { app, messages, assessmentRows, openJobs, videoSrc, cvSrc } = result
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const job = app.jobs as any
@@ -129,7 +137,7 @@ export default async function ApplicationReviewPage({ params }: { params: { id: 
 
           {/* Left column: video + transcript */}
           <div>
-            {app.video_url ? (
+            {videoSrc ? (
               <div style={{ background: '#FFFFFF', border: '1px solid #E2E0DA', borderRadius: 20, padding: '20px 22px', marginBottom: 22 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                   <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.15em', color: '#AEABA3', textTransform: 'uppercase' }}>Session recording</p>
@@ -140,10 +148,11 @@ export default async function ApplicationReviewPage({ params }: { params: { id: 
                   )}
                 </div>
                 {/* Cache-bust the stable URL so we always show the latest snapshot. */}
-                <video src={`${app.video_url}?t=${Date.now()}`} controls preload="metadata"
+                <video src={videoSrc} controls preload="metadata"
                   style={{ width: '100%', borderRadius: 12, background: '#000', display: 'block' }} />
                 <p style={{ fontSize: 11, color: '#AEABA3', marginTop: 8 }}>
-                  <a href={app.video_url} target="_blank" rel="noopener noreferrer" style={{ color: '#0A0A0A' }}>Open in new tab</a>
+                  <a href={videoSrc} target="_blank" rel="noopener noreferrer" style={{ color: '#0A0A0A' }}>Open in new tab</a>
+                  <span> · link expires in 15 minutes</span>
                   {app.status !== 'completed' && app.status !== 'reviewed' && app.status !== 'hired' && app.status !== 'rejected' && (
                     <span> · auto-saves every 60 seconds while the candidate is in the interview</span>
                   )}
@@ -195,8 +204,8 @@ export default async function ApplicationReviewPage({ params }: { params: { id: 
 
             <div style={{ background: '#FFFFFF', border: '1px solid #E2E0DA', borderRadius: 20, padding: '20px 22px', marginBottom: 22 }}>
               <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.15em', color: '#AEABA3', textTransform: 'uppercase', marginBottom: 12 }}>CV</p>
-              {app.cv_url ? (
-                <a href={app.cv_url} target="_blank" rel="noopener noreferrer"
+              {cvSrc ? (
+                <a href={cvSrc} target="_blank" rel="noopener noreferrer"
                   style={{ background: '#0A0A0A', color: '#FFFFFF', textDecoration: 'none', padding: '8px 16px', borderRadius: 10, fontSize: 13, fontWeight: 600, display: 'inline-block' }}>
                   Open CV
                 </a>

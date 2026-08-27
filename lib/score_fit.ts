@@ -233,7 +233,7 @@ function bandFor(rec: FitResult['recommendation']): [number, number] {
   if (rec === 'maybe')       return [0.45, 0.6499]
   return [0.00, 0.4499]
 }
-function reconcileFitToRec(fit: number, rec: FitResult['recommendation']): number {
+export function reconcileFitToRec(fit: number, rec: FitResult['recommendation']): number {
   const [lo, hi] = bandFor(rec)
   if (fit < lo) return Math.min(lo + 0.05, hi)
   if (fit > hi) return Math.max(hi - 0.05, lo)

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { checkAdminAuth } from '@/lib/auth'
 import { logAudit } from '@/lib/audit'
+import { toObjectPath } from '@/lib/storage'
 
 /**
  * POST /api/admin/applications/[id]/reset
@@ -46,7 +47,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
   // Best-effort delete the video file from Storage. Path is the part after /video/ in the URL.
   if (app.video_url) {
-    const videoPath = extractStoragePath(app.video_url, 'video')
+    const videoPath = toObjectPath(app.video_url, 'video')
     if (videoPath) {
       try { await supabaseAdmin.storage.from('video').remove([videoPath]) } catch { /* ignore */ }
     }
@@ -70,7 +71,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   }
   if (wipeCv) {
     if (app.cv_url) {
-      const cvPath = extractStoragePath(app.cv_url, 'cv')
+      const cvPath = toObjectPath(app.cv_url, 'cv')
       if (cvPath) {
         try { await supabaseAdmin.storage.from('cv').remove([cvPath]) } catch { /* ignore */ }
       }
@@ -96,11 +97,5 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   return NextResponse.json({ ok: true, wipe_cv: wipeCv })
 }
 
-// Extract the Supabase Storage object path from a public URL.
-// URL pattern: https://<ref>.supabase.co/storage/v1/object/public/<bucket>/<path>
-function extractStoragePath(url: string, bucket: string): string | null {
-  const marker = `/storage/v1/object/public/${bucket}/`
-  const i = url.indexOf(marker)
-  if (i === -1) return null
-  return decodeURIComponent(url.slice(i + marker.length))
-}
+// Path resolution lives in lib/storage.ts so upload, render and delete all
+// agree on the shape of what is stored (legacy public URL or bare object path).

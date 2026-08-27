@@ -3,7 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { checkAdminAuth } from '@/lib/auth'
 import { logAudit } from '@/lib/audit'
 import { generateReportHTML } from '@/lib/generate_report'
-import type { FitResult } from '@/lib/score_fit'
+import { reconcileFitToRec, type FitResult } from '@/lib/score_fit'
 
 const ALLOWED_RECS = ['strong_hire', 'hire', 'maybe', 'no_hire'] as const
 const ALLOWED_STATUSES = ['completed', 'reviewed', 'hired', 'rejected'] as const
@@ -56,7 +56,15 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
 
     if (app?.score_data && update.recommendation !== app.recommendation) {
       const fit = app.score_data as FitResult
-      const patched: FitResult = { ...fit, recommendation: update.recommendation }
+      // Keep the displayed fit % consistent with the admin's chosen verdict.
+      // Without this, overriding (say) a 100% strong_hire to no_hire would
+      // render "100% — No contratar", which is exactly what confused the
+      // reviewer. reconcileFitToRec snaps the % into the new recommendation band.
+      const patched: FitResult = {
+        ...fit,
+        recommendation: update.recommendation,
+        overall_fit: reconcileFitToRec(fit.overall_fit, update.recommendation),
+      }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const job = app.jobs as any
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

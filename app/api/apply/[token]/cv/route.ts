@@ -41,8 +41,9 @@ export async function POST(request: NextRequest, { params }: { params: { token: 
     console.error('CV storage upload failed:', upErr)
     return NextResponse.json({ error: `Failed to store CV: ${upErr.message}` }, { status: 500 })
   }
-  const { data: pub } = supabaseAdmin.storage.from('cv').getPublicUrl(objectPath)
-  const cvUrl = pub.publicUrl
+  // Store the object path. Never a public URL: a CV carries identity, contact
+  // details and employment history, and must not be reachable without authentication.
+  const cvUrl = objectPath
 
   // Try to extract text (PDFs only) so the interview prompt can use it
   let cvText: string | null = null

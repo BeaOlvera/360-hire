@@ -37,3 +37,9 @@ pswds.txt
 # user-provided source documents (not for a public repo)
 *.docx
 *.doc
+
+# local handover note, never commit
+NEW_ADMIN_PASSWORD.txt
+
+.vercel
+.env*
